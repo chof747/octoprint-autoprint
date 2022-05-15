@@ -1,0 +1,17 @@
+version: '3.4'
+
+services:
+  octoprint:
+    image: ghcr.io/chof747/octoprint-devcontainer:latest
+    networks:
+      octoprint-dev:
+        aliases: 
+         - octoprint
+    volumes:
+      - .:/workspace:delegated
+    ports: 
+      - 1880:80
+
+networks:
+  octoprint-dev: 
+    name: octoprint-dev
