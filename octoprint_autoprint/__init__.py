@@ -48,11 +48,11 @@ class AutoprintPlugin(octoprint.plugin.SettingsPlugin,
                 # version check: github repository
                 "type": "github_release",
                 "user": "chof747",
-                "repo": "octoprint_autoprint",
+                "repo": "octoprint-autoprint",
                 "current": self._plugin_version,
 
                 # update method: pip
-                "pip": "https://github.com/chof747/octoprint_autoprint/archive/{target_version}.zip",
+                "pip": "https://github.com/chof747/octoprint-autoprint/archive/{target_version}.zip",
             }
         }
 

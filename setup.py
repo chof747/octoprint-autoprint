@@ -27,7 +27,7 @@ plugin_author = "Christian Hofbauer"
 plugin_author_email = "chof@gmx.at"
 
 # The plugin's homepage URL. Can be overwritten within OctoPrint's internal data via __plugin_url__ in the plugin module
-plugin_url = "https://github.com/chof747/octoprint_autoprint"
+plugin_url = "https://github.com/chof747/octoprint-autoprint"
 
 # The plugin's license. Can be overwritten within OctoPrint's internal data via __plugin_license__ in the plugin module
 plugin_license = "AGPLv3"

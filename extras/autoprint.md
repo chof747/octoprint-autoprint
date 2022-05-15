@@ -11,9 +11,9 @@ license: AGPLv3
 # TODO
 date: today's date in format YYYY-MM-DD, e.g. 2015-04-21
 
-homepage: https://github.com/chof747/octoprint_autoprint
-source: https://github.com/chof747/octoprint_autoprint
-archive: https://github.com/chof747/octoprint_autoprint/archive/master.zip
+homepage: https://github.com/chof747/octoprint-autoprint
+source: https://github.com/chof747/octoprint-autoprint
+archive: https://github.com/chof747/octoprint-autoprint/archive/master.zip
 
 # TODO
 # Set this to true if your plugin uses the dependency_links setup parameter to include
