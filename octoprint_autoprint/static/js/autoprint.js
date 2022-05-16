@@ -4,6 +4,7 @@
  * Author: Christian Hofbauer
  * License: AGPLv3
  */
+
 $(function() {
     function AutoprintViewModel(parameters) {
         var self = this;
@@ -13,6 +14,13 @@ $(function() {
         // self.settingsViewModel = parameters[1];
 
         // TODO: Implement your plugin's view model here.
+
+        self.startPrinter = function () {
+            OctoPrint.simpleApiCommand("autoprint", "startPrinter", {}).then(function () {
+                //self.updateGpioButtons();
+            });
+        }
+
     }
 
     /* view model class, parameters for constructor, container to bind to
@@ -22,8 +30,8 @@ $(function() {
     OCTOPRINT_VIEWMODELS.push({
         construct: AutoprintViewModel,
         // ViewModels your plugin depends on, e.g. loginStateViewModel, settingsViewModel, ...
-        dependencies: [ /* "loginStateViewModel", "settingsViewModel" */ ],
+        dependencies: [ "settingsViewModel" ],
         // Elements to bind to, e.g. #settings_plugin_autoprint, #tab_plugin_autoprint, ...
-        elements: [ /* ... */ ]
+        elements: [ "#sidebar_plugin_autoprint" ]
     });
 });
