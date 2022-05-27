@@ -9,7 +9,7 @@ services:
          - octoprint
     volumes:
       - .:/workspace:delegated
-      - ./tests/octoprint-dev-config:/octoprint/octoprint:delegated
+      - ./tests/octoprint-dev-config:/octoprint/octoprint
     ports: 
       - 1880:80
 

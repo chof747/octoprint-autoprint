@@ -8,18 +8,30 @@
 $(function() {
     function AutoprintViewModel(parameters) {
         var self = this;
+        self.setttings = parameters[0];        
+        self.state = ko.observable();
 
-        // assign the injected parameters, e.g.:
-        // self.loginStateViewModel = parameters[0];
-        // self.settingsViewModel = parameters[1];
 
         // TODO: Implement your plugin's view model here.
 
-        self.startPrinter = function () {
-            OctoPrint.simpleApiCommand("autoprint", "startPrinter", {}).then(function () {
+        self.onBeforeBinding = function() {
+            self.state({
+                printer : plugin_autoprint_state.printer
+            })
+            console.log(self.settings);
+        };
+
+        self.startUpPrinter = function () {
+            OctoPrint.simpleApiCommand("autoprint", "startUpPrinter", {}).then(function () {
                 //self.updateGpioButtons();
             });
-        }
+        };
+
+        self.shutDownPrinter = function () {
+            OctoPrint.simpleApiCommand("autoprint", "shutDownPrinter", {}).then(function () {
+                //self.updateGpioButtons();
+            });
+        };
 
     }
 

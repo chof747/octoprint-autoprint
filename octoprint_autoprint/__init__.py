@@ -10,10 +10,11 @@ from __future__ import absolute_import
 # Take a look at the documentation on what other plugin mixins are available.
 
 import octoprint.plugin
-import RPi.GPIO as GPIO
 
+from .printercontrol import PrinterControl
 
-class AutoprintPlugin(octoprint.plugin.SettingsPlugin,
+class AutoprintPlugin(octoprint.plugin.StartupPlugin,
+                      octoprint.plugin.SettingsPlugin,
                       octoprint.plugin.AssetPlugin,
                       octoprint.plugin.TemplatePlugin,
                       octoprint.plugin.SimpleApiPlugin
@@ -21,32 +22,56 @@ class AutoprintPlugin(octoprint.plugin.SettingsPlugin,
 
     def __init__(self) -> None:
         super().__init__()
-        self.gpio = dict(
-            printer=17,
-            light=18
-        )
+
+    # ~~ Startup Plugin
+
+    def on_after_startup(self):
+        self._printerControl = PrinterControl(self._logger)
+        self.assignPins()
 
     # ~  TemplatePlugin mixin
     def get_template_configs(self):
         return [{
             "type": "settings",
             "custom_bindings": False
+        },
+            {
+            "type": "sidebar",
+            "custom_bindings": True
         }
         ]
+
+    def get_template_vars(self):
+        result = dict(
+            state = dict(
+                printer = self._printerControl.isPrinterOn,
+                light = self._printerControl.isLightOn
+            )
+        )
+
+        self._logger.info(result)
+        return result
 
     # ~~ SettingsPlugin mixin
 
     def get_settings_defaults(self):
         return {
-            "gpio": self.gpio
+            "gpio": {
+                "printer": 17,
+                "light": 18
+            }
         }
 
     def on_settings_save(self, data):
-
-        GPIO.cleanup(self._settings.get(["gpio.printer"]))
-        GPIO.cleanup(self._settings.get(["gpio.light"]))
-
         octoprint.plugin.SettingsPlugin.on_settings_save(self, data)
+        self.assignPins()
+
+    
+
+
+    def assignPins(self):
+        self._printerControl.printerGpio = self._settings.get(["gpio", "printer"])
+        self._printerControl.lightGpio = self._settings.get(["gpio", "light"])
 
     # ~~ AssetPlugin mixin
 
@@ -63,15 +88,28 @@ class AutoprintPlugin(octoprint.plugin.SettingsPlugin,
 
     def get_api_commands(self):
         return {
-            "startPrinter": [],
-            "stopPrinter": [],
-            "printWaiting": []
+            "startUpPrinter": [],
+            "shutDownPrinter": [],
+            "printWaiting": [],
+            "getState": []
         }
 
     def on_api_command(self, command, data):
         self._logger.info(f"Command called: %s", command)
-        if "startPrinter" == command:
-            self.startPrinter()
+        if "startUpPrinter" == command:
+            self._printerControl.startUpPrinter()
+        elif "shutDownPrinter" == command:
+            self._printerControl.shutDownPrinter()
+        elif "getState" == command:
+            self._printerControl.getState()
+
+    def on_api_get(self, request):
+        self._logger.info(request.query_string)
+        if ('state' == request.query_string):
+            return {
+                'printer' : self._printerControl.isPrinterOn,
+                'light' : self._printerControl.isLightOn
+            }
 
     # ~~ Softwareupdate hook
 
@@ -94,20 +132,6 @@ class AutoprintPlugin(octoprint.plugin.SettingsPlugin,
                 "pip": "https://github.com/chof747/octoprint-autoprint/archive/{target_version}.zip",
             }
         }
-
-    # ~~ Specific functions
-    def configureGPIOs(self):
-        self.gpio.printer = self._settings.get(["gpio.printer"])
-        self.gpio.light = self._settings.get(["gpio.light"])
-        GPIO.setup(self.gpio.printer, GPIO.OUT)
-        GPIO.setup(self.gpio.light, GPIO.OUT)
-
-        GPIO.output(self.gpio.printer, GPIO.LOW)
-        GPIO.output(self.gpio.light, GPIO.LOW)
-
-    def startPrinter(self):
-        self._logger.info("Turning on printer by via GPIO%2d (printer) and GPIO%2d (light)" %
-                          ( self.gpio['printer'], self.gpio['light']))
 
 
 # If you want your plugin to be registered within OctoPrint under a different name than what you defined in setup.py
