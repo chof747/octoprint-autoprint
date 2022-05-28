@@ -9,3 +9,6 @@ dist
 *.zip
 *.code-workspace
 octoprint-dev-config
+scrapbook
+tests/requests
+tests/config.*
