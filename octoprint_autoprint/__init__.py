@@ -27,7 +27,7 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
 
     def on_after_startup(self):
         self._printerControl = PrinterControl(self._logger)
-        self.assignPins()
+        self.assignSettings()
 
     # ~  TemplatePlugin mixin
     def get_template_configs(self):
@@ -59,16 +59,24 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
             "gpio": {
                 "printer": 17,
                 "light": 18
+            },
+            "printer": {
+                "startupTime" : 5
+            },
+            "nozzle": {
+                "cooldownTemp" : 60
             }
         }
 
     def on_settings_save(self, data):
         octoprint.plugin.SettingsPlugin.on_settings_save(self, data)
-        self.assignPins()
+        self.assignSettings()
 
-    def assignPins(self):
+    def assignSettings(self):
         self._printerControl.printerGpio = self._settings.get(["gpio", "printer"])
         self._printerControl.lightGpio = self._settings.get(["gpio", "light"])
+        self._printerControl.startupTime = self._settings.get(["printer", "startupTime"])
+        self._printerControl.cooldownTemp = self._settings.get(["nozzle", "cooldownTemp"])
 
 
     # ~~ AssetPlugin mixin

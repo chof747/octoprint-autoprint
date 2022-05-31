@@ -1,12 +1,56 @@
 <form class="form-horizontal" onsubmit="return false;">
+    <h3>
+      Autoprint</h3>
+    <p>
+      The Autprint plugin is able to seperately switch the power of the printer and a
+      light source illuminating the printer or printbed. Typically those would be Relais
+      or led-strips attached to a GPIO pin of a raspberry pi. Please specify here the
+      pin numbers of this pin and please take care</p>
+    <div class="alert alert-block">
+        <p>
+            Note: Be aware that the GPIOs must be <b>active high</b> in order to work properly</p>
+    </div>
     <div class="control-group">
         <label class="control-label">{{ _('Printer Power') }}</label>
         <div class="controls">
             <input type="number" class="input-block-level" data-bind="value: settings.plugins.autoprint.gpio.printer">
+            <span class="help-inline">
+              GPIO pin (in BCM numbering scheme) of the relais powering the printer</span>
         </div>
+    </div>
+    <div class="control-group">
         <label class="control-label">{{ _('Printer Light') }}</label>
         <div class="controls">
             <input type="number" class="input-block-level" data-bind="value: settings.plugins.autoprint.gpio.light">
+            <span class="help-inline">
+              GPIO pin (in BCM numbering scheme) of the relais powering the lights</span>
         </div>
     </div>
-</form>
+
+    <div class="control-group">
+        <label class="control-label">{{ _('Printer Startup Time') }}</label>
+        <div class="controls">
+            <div class="input-append">
+                <input type="number" class="input-block-level" data-bind="value: settings.plugins.autoprint.printer.startupTime">
+                <span class="add-on">sec</span>
+            </div>
+            <span class="help-inline">
+              Time the printer needs for startup after it has been turned on, before it can be connected to Octoprint</span>
+        </div>
+    </div>
+    
+    <div class="control-group">
+        <label class="control-label">{{ _('Nozzle Cooldown Temperature') }}</label>
+        <div class="controls">
+            <div class="input-append">
+                <input type="number" class="input-block-level" data-bind="value: settings.plugins.autoprint.nozzle.cooldownTemp">
+                <span class="add-on">&deg;C</span>
+            </div>
+            <span class="help-inline">
+              Temperature threshold of the nozzle which must be reached while cooling after the print job 
+              is done, before the printer can be turned off. (To avoid leaving the filament too 
+              long in a hot hotend)</span>
+        </div>
+    </div>
+ 
+</form> 
