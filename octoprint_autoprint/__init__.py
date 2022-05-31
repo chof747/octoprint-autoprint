@@ -101,7 +101,6 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
         }
 
     def on_api_command(self, command, data):
-        self._logger.info(f"Command called: %s", command)
         if "startUpPrinter" == command:
             self._printerControl.startUpPrinter()
         elif "shutDownPrinter" == command:

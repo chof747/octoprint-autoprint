@@ -20,11 +20,11 @@ Content-Type: application/json
 }
 
 
-POST /api/plugin/gpiocontrol
-Host: octopi.local
-X-Api-Key: 5BAC3004BC394F73A2E20580E3967D12
+POST /api/plugin/autoprint
+Host: localhost:1885
+X-Api-Key: AFC41060514F4909A15B6BCF84B3D6FB
 Content-Type: application/json
 {
-    "command" : "getGpioState",
-    "id" : 1
+    "command" : "toggleLight"
 }
+

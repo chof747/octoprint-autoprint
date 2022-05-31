@@ -17,34 +17,44 @@ class PrinterControl:
 
     def startUpPrinter(self):
         """Command that starts up the printer and turns on the light"""
-        GPIO.output(self._gpioPrinter, 1)
-        self._logger.debug("Printer turned on")
+        self._switchPrinter(True)
+        self._switchLight(True)
 
-        GPIO.output(self._gpioLight, 1)
-        self._logger.debug("Light turned on")
-
-        self._statePrinter = True
-        self._stateLight = True
 
     def shutDownPrinter(self):
         """Command that starts up the printer and turns on the light"""
-        GPIO.output(self._gpioPrinter, 0)
-        self._logger.debug("Printer turned off")
+        self._switchPrinter(False)
+        self._switchLight(False)
 
-        GPIO.output(self._gpioLight, 0)
-        self._logger.debug("Light turned off")
-
-        self._statePrinter = False
-        self._stateLight = False
 
     def toggleLight(self):
         """Command to toggle the state of the light"""
-        self._stateLight = not self._stateLight
-        GPIO.output(self._gpioLight, self._stateLight)
-        self._logger.debug("Light turned %s" %
-                           ("on" if self._stateLight else "off"))
+        self._switchLight(not self._stateLight)
 
-    # ~~ Properties
+# ~~ Private helper Methods
+
+    def _prepGPIOPin(self, pin) -> bool:
+        GPIO.setup(pin, GPIO.IN)
+        state = 1 == GPIO.input(pin)
+
+        GPIO.setup(pin, GPIO.OUT)
+        GPIO.output(pin, state)
+
+        return state
+
+    def _switchLight(self, state):
+        GPIO.output(self._gpioLight, state)
+        self._logger.debug("Light turned %s" %
+                           ("on" if state else "off"))
+        self._stateLight = state
+
+    def _switchPrinter(self, state):
+        GPIO.output(self._gpioPrinter, state)
+        self._logger.debug("Printer turned %s" %
+                           ("on" if state else "off"))
+        self._statePrinter = state
+
+# ~~ Properties
 
     def _getPrinterState(self):
         return self._statePrinter
@@ -114,14 +124,3 @@ class PrinterControl:
 
     cooldownTemp = property(_getCooldownTemp, _setCooldownTemp,
                            None, "The nozzle cooldown temperature Threshold")
-
-    # ~~ Private helper Methods
-
-    def _prepGPIOPin(self, pin) -> bool:
-        GPIO.setup(pin, GPIO.IN)
-        state = 1 == GPIO.input(pin)
-
-        GPIO.setup(pin, GPIO.OUT)
-        GPIO.output(pin, state)
-
-        return state
