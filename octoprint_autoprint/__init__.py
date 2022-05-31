@@ -36,7 +36,7 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
             "custom_bindings": False
         },
             {
-            "type": "sidebar",
+            "type": "tab",
             "custom_bindings": True
         }
         ]
@@ -66,12 +66,10 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
         octoprint.plugin.SettingsPlugin.on_settings_save(self, data)
         self.assignPins()
 
-    
-
-
     def assignPins(self):
         self._printerControl.printerGpio = self._settings.get(["gpio", "printer"])
         self._printerControl.lightGpio = self._settings.get(["gpio", "light"])
+
 
     # ~~ AssetPlugin mixin
 
@@ -91,7 +89,7 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
             "startUpPrinter": [],
             "shutDownPrinter": [],
             "printWaiting": [],
-            "getState": []
+            "toggleLight" : []
         }
 
     def on_api_command(self, command, data):
@@ -100,16 +98,14 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
             self._printerControl.startUpPrinter()
         elif "shutDownPrinter" == command:
             self._printerControl.shutDownPrinter()
-        elif "getState" == command:
-            self._printerControl.getState()
+        elif "toggleLight" == command:
+            self._printerControl.toggleLight()
 
     def on_api_get(self, request):
-        self._logger.info(request.query_string)
-        if ('state' == request.query_string):
-            return {
-                'printer' : self._printerControl.isPrinterOn,
-                'light' : self._printerControl.isLightOn
-            }
+        return {
+            'printer' : self._printerControl.isPrinterOn,
+            'light'   : self._printerControl.isLightOn
+        }
 
     # ~~ Softwareupdate hook
 

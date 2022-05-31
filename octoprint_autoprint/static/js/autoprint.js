@@ -8,30 +8,42 @@
 $(function() {
     function AutoprintViewModel(parameters) {
         var self = this;
-        self.setttings = parameters[0];        
-        self.state = ko.observable();
+        self.settings = parameters[0];        
+        self.statePrinter = ko.observable(false);
+        self.stateLight = ko.observable(false);
 
 
         // TODO: Implement your plugin's view model here.
 
         self.onBeforeBinding = function() {
-            self.state({
-                printer : plugin_autoprint_state.printer
-            })
             console.log(self.settings);
+            self.updateState();
         };
 
         self.startUpPrinter = function () {
             OctoPrint.simpleApiCommand("autoprint", "startUpPrinter", {}).then(function () {
-                //self.updateGpioButtons();
+                self.updateState();
             });
         };
 
         self.shutDownPrinter = function () {
             OctoPrint.simpleApiCommand("autoprint", "shutDownPrinter", {}).then(function () {
-                //self.updateGpioButtons();
+                self.updateState();
             });
         };
+
+        self.toggleLight = function() {
+            OctoPrint.simpleApiCommand("autoprint", "toggleLight", {}).then(function() {
+                self.updateState();
+            });
+        }
+
+        self.updateState = function () {
+            OctoPrint.simpleApiGet("autoprint").then(function(printer_state) {
+                self.statePrinter(printer_state.printer);
+                self.stateLight(printer_state.light);
+            });
+        }
 
     }
 
@@ -44,6 +56,6 @@ $(function() {
         // ViewModels your plugin depends on, e.g. loginStateViewModel, settingsViewModel, ...
         dependencies: [ "settingsViewModel" ],
         // Elements to bind to, e.g. #settings_plugin_autoprint, #tab_plugin_autoprint, ...
-        elements: [ "#sidebar_plugin_autoprint" ]
+        elements: [ "#tab_plugin_autoprint" ]
     });
 });

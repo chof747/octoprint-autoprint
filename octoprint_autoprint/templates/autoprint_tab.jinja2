@@ -1,0 +1,11 @@
+<table class="printerControl">
+  <tr>
+    <td>
+      <button class="btn" data-bind="click: startUpPrinter, hidden: statePrinter">{{ _('Start up Printer') }}</button>
+      <button class="btn" data-bind="click: shutDownPrinter, visible: statePrinter">{{ _('Shut Down Printer') }}</button></div></td>
+    <td>
+      <a class="button" data-bind="click: toggleLight"><i class="fas fa-lightbulb fa-2x" data-bind="css: { toggleOn: stateLight, toggleOff: !stateLight }"></i>
+      <br/>{{ _('Lights') }}</td>   
+    <td>
+      <i class="fas fa-print fa-2x" data-bind="css: { toggleOn: statePrinter, toggleOff: !statePrinter }"></i>
+      <br/>{{ _('Printer') }}</td></tr></table>

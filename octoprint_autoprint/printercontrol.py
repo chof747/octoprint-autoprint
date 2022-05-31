@@ -35,6 +35,12 @@ class PrinterControl:
         self._statePrinter = False;
         self._stateLight = False;
 
+    def toggleLight(self):
+        """Command to toggle the state of the light"""
+        self._stateLight = not self._stateLight
+        GPIO.output(self._gpioLight, self._stateLight)
+        self._logger.debug("Light turned %s" % ("on" if self._stateLight else "off"))
+
     # ~~ Properties
 
     def _getPrinterState(self):
@@ -43,9 +49,9 @@ class PrinterControl:
     isPrinterOn = property(_getPrinterState, None, None, "Represents the state of the printer relais")
 
     def _getLightState(self):
-        return self._statePrinter
+        return self._stateLight
     
-    isLightOn = property(_getPrinterState, None, None, "Represents the state of the light relais")
+    isLightOn = property(_getLightState, None, None, "Represents the state of the light relais")
 
     def _getPrinterGPIO(self):
         return self._gpioPrinter

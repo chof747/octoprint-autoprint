@@ -1,0 +1,32 @@
+# German Language Pack for AutoPrint plugin
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+
+#: octoprint_autoprint/templates/autoprint_tab.jinja2:8
+msgid " _('Lights') "
+msgstr "Beleuchtung"
+
+#: octoprint_autoprint/templates/autoprint_tab.jinja2:5
+msgid " _('Shut Down Printer') "
+msgstr "Drucker herunterfahren"
+
+#: octoprint_autoprint/templates/autoprint_tab.jinja2:4
+msgid " _('Start up Printer') "
+msgstr "Drucker starten"
+
+#: octoprint_autoprint/templates/autoprint_tab.jinja2:8
+msgid "Lights"
+msgstr "Beleuchtung"
+
+
+
+#: octoprint_autoprint/templates/autoprint_tab.jinja2:5
+msgid "Shut Down Printer"
+msgstr "Drucker herunterfahren"
+
+#: octoprint_autoprint/templates/autoprint_tab.jinja2:4
+msgid "Start up Printer"
+msgstr "Drucker starten"

@@ -1,6 +1,23 @@
-GET /api/plugin/autoprint?state
-Host: localhost:1880
+GET /api/plugin/autoprint
+Host: localhost:1885
 X-Api-Key: AFC41060514F4909A15B6BCF84B3D6FB
+
+
+POST /api/plugin/autoprint
+Host: localhost:1885
+X-Api-Key: AFC41060514F4909A15B6BCF84B3D6FB
+Content-Type: application/json
+{
+    "command" : "startUpPrinter"
+}
+
+POST /api/plugin/autoprint
+Host: localhost:1885
+X-Api-Key: AFC41060514F4909A15B6BCF84B3D6FB
+Content-Type: application/json
+{
+    "command" : "shutDownPrinter"
+}
 
 
 POST /api/plugin/gpiocontrol
@@ -11,18 +28,3 @@ Content-Type: application/json
     "command" : "getGpioState",
     "id" : 1
 }
-
-POST /api/plugin/gpiocontrol
-Host: octopi.local
-X-Api-Key: 5BAC3004BC394F73A2E20580E3967D12
-Content-Type: application/json
-{
-    "command" : "turnGpioOn",
-    "id" : 1
-}
-
-GET /api/plugin/gpiocontrol
-Host: 10.0.1.219
-X-Api-Key: 5BAC3004BC394F73A2E20580E3967D12
-
-vWUXg70g8v60vkoYuyLB9eAMZ3AocfYv9b/QD33c
