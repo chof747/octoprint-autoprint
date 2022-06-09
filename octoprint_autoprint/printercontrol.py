@@ -11,6 +11,7 @@ class PrinterControl:
         self._gpioLight = None
         self._startupTime = None
         self._cooldownTemp = None
+        self._autoprintFolder = None
         GPIO.setmode(GPIO.BCM)
 
         self._logger = logger
@@ -20,12 +21,10 @@ class PrinterControl:
         self._switchPrinter(True)
         self._switchLight(True)
 
-
     def shutDownPrinter(self):
         """Command that starts up the printer and turns on the light"""
         self._switchPrinter(False)
         self._switchLight(False)
-
 
     def toggleLight(self):
         """Command to toggle the state of the light"""
@@ -117,10 +116,22 @@ class PrinterControl:
         if ((type(temp) == int) or (type(temp) == str and temp.isnumeric())) and (int(temp) > 0):
             self._cooldownTemp = int(temp)
             self._logger.debug(
-                f"Set cooldown nozzle temperature threshold to {temp} °C")
+                f"Set cooldown nozzle temperature threshold to {temp}°C")
         else:
             self._logger.warn(
                 f"Could not assign '{temp}' as the nozzle cool down temperature threshold: Not a valid number > 0")
 
     cooldownTemp = property(_getCooldownTemp, _setCooldownTemp,
-                           None, "The nozzle cooldown temperature Threshold")
+                            None, "The nozzle cooldown temperature Threshold")
+
+    def _getAutoprintFolder(self):
+        return self._autoprintFolder
+
+    def _setAutoprintFolder(self, folder):
+        if ("" != folder):
+            self._autoprintFolder = folder
+            self._logger.debug(
+                f"Set the autoprint folder to {folder}")
+
+    autoprintFolder = property(_getAutoprintFolder, _setAutoprintFolder, None,
+                               "Folder where files are stored that can be used for automatic start")

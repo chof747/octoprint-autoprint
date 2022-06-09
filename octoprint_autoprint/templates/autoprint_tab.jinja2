@@ -1,11 +1,52 @@
-<table class="printerControl">
-  <tr>
-    <td>
-      <button class="btn" data-bind="click: startUpPrinter, hidden: statePrinter">{{ _('Start up Printer') }}</button>
-      <button class="btn" data-bind="click: shutDownPrinter, visible: statePrinter">{{ _('Shut Down Printer') }}</button></div></td>
-    <td>
-      <a class="button" data-bind="click: toggleLight"><i class="fas fa-lightbulb fa-2x" data-bind="css: { toggleOn: stateLight, toggleOff: !stateLight }"></i>
-      <br/>{{ _('Lights') }}</td>   
-    <td>
-      <i class="fas fa-print fa-2x" data-bind="css: { toggleOn: statePrinter, toggleOff: !statePrinter }"></i>
-      <br/>{{ _('Printer') }}</td></tr></table>
+<div>
+  <h1>Printer Control</h1>
+  <table class="printerControl">
+    <tr>
+      <td>
+        <button class="btn" data-bind="click: startUpPrinter, hidden: state.printer">{{ _('Start up Printer') }}</button>
+        <button class="btn" data-bind="click: shutDownPrinter, visible: state.printer">{{ _('Shut Down Printer') }}</button></div></td>
+      <td>
+        <a class="button" data-bind="click: toggleLight"><i class="fas fa-lightbulb fa-2x" data-bind="css: { toggleOn: state.light, toggleOff: !state.light }"></i>
+        <br/>{{ _('Lights') }}</td>   
+      <td>
+        <i class="fas fa-print fa-2x" data-bind="css: { toggleOn: state.printer, toggleOff: !state.printer }"></i>
+        <br/>{{ _('Printer') }}</td></tr></table></div>
+<div>
+  <h1>
+    Autoprinting</h1>
+    <div class="form-horizontal">
+      <div class="control-group">
+        <label class="control-label">{{ _('File to print')}}</label>
+        <div class="controls">
+          <div class="input">
+          <select data-bind="options: list.file, optionsCaption: '', value: autoprint.file"></select>
+          </div>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label">{{ _('Time printer to') }}</label>
+        <div class="controls radio">
+            <input type="radio" name="startFinish" value="start" id="startFinish-start" data-bind="checked: autoprint.startFinish"/>
+            <label for="startFinish-start">{{ _('start at')}}</i></label>
+            <input type="radio" name="startFinish" value="finish" id="startFinish-end" data-bind="checked: autoprint.startFinish"/>
+            <label for="startFinish-end">{{ _('finish at')}} ...</label></div>
+      </div>
+      <div class="control-group">
+        <div class="controls">
+          <input type="datetime-local" id="timerTime" data-bind="value: timerTimeDisplay"/></div>
+      </div>
+      <div>
+        <label class="control-label">{{ _('Turn off printer after job') }}</label>
+        <div class="controls">
+          <input type="checkbox" data-bind="checked: autoprint.turnOffAfterPrint" />
+        </div>
+      </div>
+      <div class="controll-group">
+        <div class="controls">
+          <button class="btn" data-bind="click: scheduleJob">{{ _('Schedule Print Job')}}</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

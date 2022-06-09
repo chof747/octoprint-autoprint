@@ -10,5 +10,6 @@ dist
 *.code-workspace
 octoprint-dev-config
 scrapbook
+.vscode
 tests/requests
 tests/config.*

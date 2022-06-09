@@ -18,3 +18,7 @@ a.button, a:hover, a:focus, a:active {
     text-decoration: none;
     cursor: pointer;
 }
+
+.controls,.radio {
+    margin-top: 5px;
+}

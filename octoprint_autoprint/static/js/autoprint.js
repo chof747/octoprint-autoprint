@@ -5,20 +5,67 @@
  * License: AGPLv3
  */
 
-$(function() {
+$(function () {
+
     function AutoprintViewModel(parameters) {
         var self = this;
-        self.settings = parameters[0];        
-        self.statePrinter = ko.observable(false);
-        self.stateLight = ko.observable(false);
+        self.settings = parameters[0];
+        self.state = {
+            printer: ko.observable(false),
+            light: ko.observable(false)
+        };
+        self.list = {
+            folder: ko.observableArray(),
+            file: ko.observableArray()
+        };
+        self.autoprint = {
+            turnOffAfterPrint: ko.observable(false),
+            startFinish: ko.observable('start'),
+            timerTime: ko.observable((new Date()).getTime()),
+            file: ko.observable()
+        };
+
+        self.timerTimeDisplay = ko.computed({
+            read: function () {
+                var time = this.autoprint.timerTime();
+                var date = undefined;
+                if (undefined == time) {
+                    date = new Date();
+                } else {
+                    date = new Date(time);
+                }
+                date.setSeconds(0);
+                date.setMilliseconds(0);
+                return (new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString()).slice(0, -1)
+            },
+            write: function (val) {
+                this.autoprint.timerTime((new Date(val)).getTime());
+            },
+            owner: self
+        });
 
 
-        // TODO: Implement your plugin's view model here.
+        self.onStartup = function () {
+            self.updateFolderList();
+        };
 
-        self.onBeforeBinding = function() {
+        self.onBeforeBinding = function () {
             console.log(self.settings);
+            ko.computed(self.updateFiles);
             self.updateState();
         };
+
+        self.onEventFolderAdded = function () {
+            self.updateFolderList();
+        }
+
+        self.onEventFolderRemoved = function () {
+            self.updateFolderList();
+        }
+
+        self.onEventFolderMoved = function () {
+            self.updateFolderList();
+        }
 
         self.startUpPrinter = function () {
             OctoPrint.simpleApiCommand("autoprint", "startUpPrinter", {}).then(function () {
@@ -32,20 +79,71 @@ $(function() {
             });
         };
 
-        self.toggleLight = function() {
-            OctoPrint.simpleApiCommand("autoprint", "toggleLight", {}).then(function() {
+        self.toggleLight = function () {
+            OctoPrint.simpleApiCommand("autoprint", "toggleLight", {}).then(function () {
                 self.updateState();
             });
         }
 
+        self.scheduleJob = function () {
+            job = {
+                file : self.autoprint.file() || "",
+                time : self.autoprint.timerTime(),
+                turnOffAfterPrint : self.autoprint.turnOffAfterPrint(),
+                startFinish : self.autoprint.startFinish()
+            }
+
+            OctoPrint.simpleApiCommand("autoprint", "scheduleJob", job);
+        }
+
         self.updateState = function () {
-            OctoPrint.simpleApiGet("autoprint").then(function(printer_state) {
-                self.statePrinter(printer_state.printer);
-                self.stateLight(printer_state.light);
+            OctoPrint.simpleApiGet("autoprint").then(function (printer_state) {
+                self.state.printer(printer_state.printer);
+                self.state.light(printer_state.light);
             });
         }
 
-    }
+        self.updateFolderList = function () {
+            var result = [];
+
+            var readFolder = function (folder) {
+                _.each(_.filter(folder, function (entry) {
+                    return entry.type == "folder";
+                }), function (folder) {
+                    result.push("/" + folder.path);
+                    if (folder.children.length > 0) {
+                        readFolder(folder.children.sort(sortFileList));
+                    }
+                });
+            };
+
+            var sortFileList = function (a, b) {
+                return (a.name > b.name) ? 1 : ((a.name < b.name) ? -1 : 0);
+            }
+
+            OctoPrint.files.list(true).done(function (response) {
+                readFolder(response.files.sort(sortFileList));
+                self.list.folder(result);
+            })
+        }
+
+        self.updateFiles = function () {
+            var folder = self.settings.settings.plugins.autoprint.folders.autoprint();
+            var result = [];
+
+            if ('' != folder) {
+                OctoPrint.files.listForLocation(`/local${folder}`, false).done(function (response) {
+                    _.each(response.children, function (file) {
+                        if (file.type == "machinecode") {
+                            result.push(file.name);
+                        }
+                    })
+                    self.list.file(result);
+                });
+            }
+        };
+
+    };
 
     /* view model class, parameters for constructor, container to bind to
      * Please see http://docs.octoprint.org/en/master/plugins/viewmodels.html#registering-custom-viewmodels for more details
@@ -54,8 +152,8 @@ $(function() {
     OCTOPRINT_VIEWMODELS.push({
         construct: AutoprintViewModel,
         // ViewModels your plugin depends on, e.g. loginStateViewModel, settingsViewModel, ...
-        dependencies: [ "settingsViewModel" ],
+        dependencies: ["settingsViewModel"],
         // Elements to bind to, e.g. #settings_plugin_autoprint, #tab_plugin_autoprint, ...
-        elements: [ "#tab_plugin_autoprint" ]
+        elements: ["#settings_plugin_autoprint", "#tab_plugin_autoprint"]
     });
 });

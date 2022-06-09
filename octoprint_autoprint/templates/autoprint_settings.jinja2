@@ -1,4 +1,4 @@
-<form class="form-horizontal" onsubmit="return false;">
+<form class="form-horizontal" onsubmit="return false;" onload="$parent.loadFolderList">
     <h3>
       Autoprint</h3>
     <p>
@@ -13,7 +13,7 @@
     <div class="control-group">
         <label class="control-label">{{ _('Printer Power') }}</label>
         <div class="controls">
-            <input type="number" class="input-block-level" data-bind="value: settings.plugins.autoprint.gpio.printer">
+            <input type="number" class="input-block-level" data-bind="value: settings.settings.plugins.autoprint.gpio.printer">
             <span class="help-inline">
               GPIO pin (in BCM numbering scheme) of the relais powering the printer</span>
         </div>
@@ -21,7 +21,7 @@
     <div class="control-group">
         <label class="control-label">{{ _('Printer Light') }}</label>
         <div class="controls">
-            <input type="number" class="input-block-level" data-bind="value: settings.plugins.autoprint.gpio.light">
+            <input type="number" class="input-block-level" data-bind="value: settings.settings.plugins.autoprint.gpio.light">
             <span class="help-inline">
               GPIO pin (in BCM numbering scheme) of the relais powering the lights</span>
         </div>
@@ -31,7 +31,7 @@
         <label class="control-label">{{ _('Printer Startup Time') }}</label>
         <div class="controls">
             <div class="input-append">
-                <input type="number" class="input-block-level" data-bind="value: settings.plugins.autoprint.printer.startupTime">
+                <input type="number" class="input-block-level" data-bind="value: settings.settings.plugins.autoprint.printer.startupTime">
                 <span class="add-on">sec</span>
             </div>
             <span class="help-inline">
@@ -43,7 +43,7 @@
         <label class="control-label">{{ _('Nozzle Cooldown Temperature') }}</label>
         <div class="controls">
             <div class="input-append">
-                <input type="number" class="input-block-level" data-bind="value: settings.plugins.autoprint.nozzle.cooldownTemp">
+                <input type="number" class="input-block-level" data-bind="value: settings.settings.plugins.autoprint.nozzle.cooldownTemp">
                 <span class="add-on">&deg;C</span>
             </div>
             <span class="help-inline">
@@ -53,4 +53,16 @@
         </div>
     </div>
  
+    <div class="control-group">
+        <label class="control-label">{{ _('Autoprint folder') }}</label>
+        <div class="controls">
+            <div class="input">
+                <select data-bind="options: list.folder, optionsCaption: '', value: settings.settings.plugins.autoprint.folders.autoprint"></select>
+            </div>
+            <span class="help-inline">
+            This specifies the folder which can contain files that are eligable for autoprinting after start. Only files stored
+            in this folder can be selected in the autoprint tab.
+            </span>
+        </div>
+    </div>
 </form> 

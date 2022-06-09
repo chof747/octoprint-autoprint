@@ -12,6 +12,9 @@ from __future__ import absolute_import
 import octoprint.plugin
 
 from .printercontrol import PrinterControl
+from datetime import datetime
+from .printjob import PrintJob, PrintJobTooEarly
+
 
 class AutoprintPlugin(octoprint.plugin.StartupPlugin,
                       octoprint.plugin.SettingsPlugin,
@@ -22,6 +25,7 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
 
     def __init__(self) -> None:
         super().__init__()
+        self._printJob = None
 
     # ~~ Startup Plugin
 
@@ -33,7 +37,7 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
     def get_template_configs(self):
         return [{
             "type": "settings",
-            "custom_bindings": False
+            "custom_bindings": True
         },
             {
             "type": "tab",
@@ -43,9 +47,9 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
 
     def get_template_vars(self):
         result = dict(
-            state = dict(
-                printer = self._printerControl.isPrinterOn,
-                light = self._printerControl.isLightOn
+            state=dict(
+                printer=self._printerControl.isPrinterOn,
+                light=self._printerControl.isLightOn
             )
         )
 
@@ -61,10 +65,13 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
                 "light": 18
             },
             "printer": {
-                "startupTime" : 5
+                "startupTime": 5
             },
             "nozzle": {
-                "cooldownTemp" : 60
+                "cooldownTemp": 60
+            },
+            "folders": {
+                "autoprint": ''
             }
         }
 
@@ -73,11 +80,15 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
         self.assignSettings()
 
     def assignSettings(self):
-        self._printerControl.printerGpio = self._settings.get(["gpio", "printer"])
+        self._printerControl.printerGpio = self._settings.get(
+            ["gpio", "printer"])
         self._printerControl.lightGpio = self._settings.get(["gpio", "light"])
-        self._printerControl.startupTime = self._settings.get(["printer", "startupTime"])
-        self._printerControl.cooldownTemp = self._settings.get(["nozzle", "cooldownTemp"])
-
+        self._printerControl.startupTime = self._settings.get(
+            ["printer", "startupTime"])
+        self._printerControl.cooldownTemp = self._settings.get(
+            ["nozzle", "cooldownTemp"])
+        self._printerControl.autoprintFolder = self._settings.get(
+            ["folders", "autoprint"])
 
     # ~~ AssetPlugin mixin
 
@@ -97,7 +108,10 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
             "startUpPrinter": [],
             "shutDownPrinter": [],
             "printWaiting": [],
-            "toggleLight" : []
+            "toggleLight": [],
+            "scheduleJob": [
+                "file", "time", "startFinish", "turnOffAfterPrint"
+            ]
         }
 
     def on_api_command(self, command, data):
@@ -107,11 +121,27 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
             self._printerControl.shutDownPrinter()
         elif "toggleLight" == command:
             self._printerControl.toggleLight()
+        elif "scheduleJob" == command:
+            from flask import make_response
+            time = datetime.fromtimestamp(data["time"]/1000)
+            path = f'{self._printerControl.autoprintFolder}/{data["file"]}'
+            try:
+                pj = PrintJob(path,
+                                        time, data["turnOffAfterPrint"], 
+                                        data["startFinish"], 
+                                        self._logger,
+                                        self._file_manager)
+                self._printJob = pj
+                return self.printJob.__dict__()
+            except PrintJobTooEarly as e:
+                return make_response({
+                    'error' : "Printjob is scheduled too early"
+                },400)
 
     def on_api_get(self, request):
         return {
-            'printer' : self._printerControl.isPrinterOn,
-            'light'   : self._printerControl.isLightOn
+            'printer': self._printerControl.isPrinterOn,
+            'light': self._printerControl.isLightOn
         }
 
     # ~~ Softwareupdate hook
