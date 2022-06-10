@@ -22,3 +22,11 @@ a.button, a:hover, a:focus, a:active {
 .controls,.radio {
     margin-top: 5px;
 }
+
+div.scheduledjob {
+    margin-top: 20px;
+}
+
+.scheduledjob * td {
+    padding-right: 20px;
+} 

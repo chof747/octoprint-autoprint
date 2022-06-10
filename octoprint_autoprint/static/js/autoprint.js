@@ -35,6 +35,12 @@ $(function () {
             file : ko.observable(undefined)
         }
 
+        self.scheduledJob = {
+            file : ko.observable(undefined),
+            startTime : ko.observable(undefined),
+            turnOffAfterPrint: ko.observable(undefined)
+        }
+
         self.timeDisplay = ko.computed({
             read: function () {
                 var time = this.autoprint.time();
@@ -122,9 +128,19 @@ $(function () {
 
         self.updateState = function () {
             OctoPrint.simpleApiGet("autoprint").then(function (printer_state) {
-                self.state.printer(printer_state.printer);
-                self.state.light(printer_state.light);
+                self.state.printer(printer_state.state.printer);
+                self.state.light(printer_state.state.light);
+
+                if (undefined !== printer_state.scheduledJob) {
+                    self.updateScheduledJob(printer_state.scheduledJob);
+                }
             });
+        }
+
+        self.updateScheduledJob = function(jobdata) {
+            self.scheduledJob.file(jobdata.file);
+            self.scheduledJob.startTime(jobdata.startTime);
+            self.scheduledJob.turnOffAfterPrint(jobdata.turnOffAfterPrint);
         }
 
         self.updateFolderList = function () {
@@ -186,6 +202,7 @@ $(function () {
         
         self.handlePrintJobSuccess = function(data) {
             self.clearErrorMessages();
+            self.updateScheduledJob(data);
         }
 
     };

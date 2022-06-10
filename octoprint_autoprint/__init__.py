@@ -123,42 +123,48 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
             self._printerControl.toggleLight()
         elif "scheduleJob" == command:
             return self._handleScheduleJob(data)
-           
 
     def on_api_get(self, request):
-        return {
-            'printer': self._printerControl.isPrinterOn,
-            'light': self._printerControl.isLightOn
+        result = {
+            'state': {
+                'printer': self._printerControl.isPrinterOn,
+                'light': self._printerControl.isLightOn
+            }
         }
+
+        if None != self._printJob:
+            result['scheduledJob'] = self._printJob.__dict__()
+
+        return result
 
     def _handleScheduleJob(self, jobData):
         from flask import make_response
         time = datetime.fromtimestamp(jobData["time"]/1000)
         errors = []
 
-        if not jobData["file"]: 
+        if not jobData["file"]:
             errors.append({
-                'msg' : "Please provide a gcode file for the scheduled print job!",
-                'parameter' : "file" 
+                'msg': "Please provide a gcode file for the scheduled print job!",
+                'parameter': "file"
             })
         else:
             path = f'{self._printerControl.autoprintFolder}/{jobData["file"]}'
             try:
                 pj = PrintJob(path,
-                                        time, jobData["turnOffAfterPrint"], 
-                                        jobData["startFinish"], 
-                                        self._logger,
-                                        self._file_manager)
+                              time, jobData["turnOffAfterPrint"],
+                              jobData["startFinish"],
+                              self._logger,
+                              self._file_manager)
                 self._printJob = pj
-                
+
             except PrintJobTooEarly as e:
                 errors.append({
-                    'msg' : e.message,
-                    'parameter' : 'time'
+                    'msg': e.message,
+                    'parameter': 'time'
                 })
 
-        if len(errors)>0:
-            return make_response({"errors" : errors}, 400)
+        if len(errors) > 0:
+            return make_response({"errors": errors}, 400)
         else:
             return make_response(self._printJob.__dict__(), 200)
 

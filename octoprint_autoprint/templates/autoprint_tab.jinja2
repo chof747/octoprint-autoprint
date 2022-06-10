@@ -55,7 +55,24 @@
           <button class="btn" data-bind="click: scheduleJob">{{ _('Schedule Print Job')}}</button>
         </div>
       </div>
-
     </div>
+  </div>
+  <div data-bind="visible: scheduledJob.file" class="alert-box alert alert-success scheduledjob">
+    <p>
+      <b>Scheduled Job</b></p>
+    <table>
+      <tr>
+        <td>Printjob File</td>
+        <td><span data-bind="text: scheduledJob.file"/></td>
+      </tr>
+      <tr>
+        <td>Starting at</td>
+        <td><span data-bind="text: scheduledJob.startTime"/></td>
+      </tr>
+       <tr>
+        <td>Turn off printer when done</td>
+        <td><span data-bind="text: scheduledJob.turnOffAfterPrint() ? 'yes' : 'no'"/></td>
+      </tr>
+    </table>
   </div>
 </div>
