@@ -21,6 +21,10 @@
           <div class="input">
           <select data-bind="options: list.file, optionsCaption: '', value: autoprint.file"></select>
           </div>
+          <div id="file_error" class="alert-box alert alert-error" data-bind="visible: errormsgs.file">
+            <p>
+              <b>Error:</b> <span data-bind="text: errormsgs.file"></span></p>
+          </div>
         </div>
       </div>
       <div class="control-group">
@@ -33,9 +37,14 @@
       </div>
       <div class="control-group">
         <div class="controls">
-          <input type="datetime-local" id="timerTime" data-bind="value: timerTimeDisplay"/></div>
+          <input type="datetime-local" id="timerTime" data-bind="value: timeDisplay"/>
+          <div id="timerTime_error" class="alert-box alert alert-error" data-bind="visible: errormsgs.time">
+            <p>
+              <b>Error:</b> <span data-bind="text: errormsgs.time"></span></p>
+          </div>
+        </div>
       </div>
-      <div>
+      <div class="control-group">
         <label class="control-label">{{ _('Turn off printer after job') }}</label>
         <div class="controls">
           <input type="checkbox" data-bind="checked: autoprint.turnOffAfterPrint" />

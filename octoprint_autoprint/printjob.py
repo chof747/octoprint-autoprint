@@ -1,6 +1,7 @@
 from lib2to3.pygram import python_grammar_no_print_statement
 from logging import Logger
 from datetime import datetime, timedelta
+from math import ceil
 
 from octoprint.filemanager import FileManager
 
@@ -33,8 +34,9 @@ class PrintJob:
 
         self._startTime = self._time - timedelta(seconds=duration)
         if (self._startTime < datetime.now()):
+            wrongtime = self._startTime
             self._startTime = None
-            raise PrintJobTooEarly()
+            raise PrintJobTooEarly((datetime.now() - wrongtime).total_seconds() / 60);
 
     def __dict__(self):
         return {
@@ -44,4 +46,18 @@ class PrintJob:
         }
 
 class PrintJobTooEarly(Exception):
-    pass
+
+    def __init__(self, delay):
+
+        delay_suitable = delay
+        time_unit = "minutes"
+        
+        if (delay>=60*24):
+            delay_suitable = ceil(delay / 60 /24 * 10) / 10
+            time_unit = "days"
+        if (delay>=120):
+            delay_suitable = ceil(delay / 60)
+            time_unit = "hours"
+
+        self.message = f"Printjob is scheduled too early (move by {delay_suitable} {time_unit})."
+        super().__init__(self.message)

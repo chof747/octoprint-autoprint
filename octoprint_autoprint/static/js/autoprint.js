@@ -8,6 +8,11 @@
 $(function () {
 
     function AutoprintViewModel(parameters) {
+
+        /* 
+         * Data and Observables **********************************************************
+         */
+
         var self = this;
         self.settings = parameters[0];
         self.state = {
@@ -21,13 +26,18 @@ $(function () {
         self.autoprint = {
             turnOffAfterPrint: ko.observable(false),
             startFinish: ko.observable('start'),
-            timerTime: ko.observable((new Date()).getTime()),
+            time: ko.observable((new Date()).getTime()),
             file: ko.observable()
         };
 
-        self.timerTimeDisplay = ko.computed({
+        self.errormsgs = {
+            time : ko.observable(undefined),
+            file : ko.observable(undefined)
+        }
+
+        self.timeDisplay = ko.computed({
             read: function () {
-                var time = this.autoprint.timerTime();
+                var time = this.autoprint.time();
                 var date = undefined;
                 if (undefined == time) {
                     date = new Date();
@@ -39,11 +49,14 @@ $(function () {
                 return (new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString()).slice(0, -1)
             },
             write: function (val) {
-                this.autoprint.timerTime((new Date(val)).getTime());
+                this.autoprint.time((new Date(val)).getTime());
             },
             owner: self
         });
 
+        /* 
+         * Eventhandlers *****************************************************************
+         */
 
         self.onStartup = function () {
             self.updateFolderList();
@@ -67,6 +80,10 @@ $(function () {
             self.updateFolderList();
         }
 
+        /* 
+         * Actions ***********************************************************************
+         */
+
         self.startUpPrinter = function () {
             OctoPrint.simpleApiCommand("autoprint", "startUpPrinter", {}).then(function () {
                 self.updateState();
@@ -88,13 +105,20 @@ $(function () {
         self.scheduleJob = function () {
             job = {
                 file : self.autoprint.file() || "",
-                time : self.autoprint.timerTime(),
+                time : self.autoprint.time(),
                 turnOffAfterPrint : self.autoprint.turnOffAfterPrint(),
                 startFinish : self.autoprint.startFinish()
             }
 
-            OctoPrint.simpleApiCommand("autoprint", "scheduleJob", job);
+            OctoPrint.simpleApiCommand("autoprint", "scheduleJob", job).then(
+                self.handlePrintJobSuccess, 
+                self.handlePrintJobError);
         }
+
+        /* 
+         * Update Functions **************************************************************
+         */
+
 
         self.updateState = function () {
             OctoPrint.simpleApiGet("autoprint").then(function (printer_state) {
@@ -142,6 +166,27 @@ $(function () {
                 });
             }
         };
+
+        /*
+         * Response Hanlders ************************************************************* 
+         */
+
+        self.clearErrorMessages = function() {
+            self.errormsgs.time(undefined);
+            self.errormsgs.file(undefined);
+        
+        }
+        
+        self.handlePrintJobError = function(errors) {
+            self.clearErrorMessages();
+            errors.responseJSON.errors.forEach(e => {
+                self.errormsgs[e.parameter](e.msg)
+            });
+        }
+        
+        self.handlePrintJobSuccess = function(data) {
+            self.clearErrorMessages();
+        }
 
     };
 
