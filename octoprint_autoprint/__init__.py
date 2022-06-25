@@ -12,6 +12,9 @@ from __future__ import absolute_import
 import octoprint.plugin
 
 from .printercontrol import PrinterControl
+from datetime import datetime
+from .printjob import PrintJob, PrintJobTooEarly
+
 
 class AutoprintPlugin(octoprint.plugin.StartupPlugin,
                       octoprint.plugin.SettingsPlugin,
@@ -22,30 +25,31 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
 
     def __init__(self) -> None:
         super().__init__()
+        self._printJob = None
 
     # ~~ Startup Plugin
 
     def on_after_startup(self):
         self._printerControl = PrinterControl(self._logger)
-        self.assignPins()
+        self.assignSettings()
 
     # ~  TemplatePlugin mixin
     def get_template_configs(self):
         return [{
             "type": "settings",
-            "custom_bindings": False
+            "custom_bindings": True
         },
             {
-            "type": "sidebar",
+            "type": "tab",
             "custom_bindings": True
         }
         ]
 
     def get_template_vars(self):
         result = dict(
-            state = dict(
-                printer = self._printerControl.isPrinterOn,
-                light = self._printerControl.isLightOn
+            state=dict(
+                printer=self._printerControl.isPrinterOn,
+                light=self._printerControl.isLightOn
             )
         )
 
@@ -59,19 +63,32 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
             "gpio": {
                 "printer": 17,
                 "light": 18
+            },
+            "printer": {
+                "startupTime": 5
+            },
+            "nozzle": {
+                "cooldownTemp": 60
+            },
+            "folders": {
+                "autoprint": ''
             }
         }
 
     def on_settings_save(self, data):
         octoprint.plugin.SettingsPlugin.on_settings_save(self, data)
-        self.assignPins()
+        self.assignSettings()
 
-    
-
-
-    def assignPins(self):
-        self._printerControl.printerGpio = self._settings.get(["gpio", "printer"])
+    def assignSettings(self):
+        self._printerControl.printerGpio = self._settings.get(
+            ["gpio", "printer"])
         self._printerControl.lightGpio = self._settings.get(["gpio", "light"])
+        self._printerControl.startupTime = self._settings.get(
+            ["printer", "startupTime"])
+        self._printerControl.cooldownTemp = self._settings.get(
+            ["nozzle", "cooldownTemp"])
+        self._printerControl.autoprintFolder = self._settings.get(
+            ["folders", "autoprint"])
 
     # ~~ AssetPlugin mixin
 
@@ -91,25 +108,65 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
             "startUpPrinter": [],
             "shutDownPrinter": [],
             "printWaiting": [],
-            "getState": []
+            "toggleLight": [],
+            "scheduleJob": [
+                "file", "time", "startFinish", "turnOffAfterPrint"
+            ]
         }
 
     def on_api_command(self, command, data):
-        self._logger.info(f"Command called: %s", command)
         if "startUpPrinter" == command:
             self._printerControl.startUpPrinter()
         elif "shutDownPrinter" == command:
             self._printerControl.shutDownPrinter()
-        elif "getState" == command:
-            self._printerControl.getState()
+        elif "toggleLight" == command:
+            self._printerControl.toggleLight()
+        elif "scheduleJob" == command:
+            return self._handleScheduleJob(data)
 
     def on_api_get(self, request):
-        self._logger.info(request.query_string)
-        if ('state' == request.query_string):
-            return {
-                'printer' : self._printerControl.isPrinterOn,
-                'light' : self._printerControl.isLightOn
+        result = {
+            'state': {
+                'printer': self._printerControl.isPrinterOn,
+                'light': self._printerControl.isLightOn
             }
+        }
+
+        if None != self._printJob:
+            result['scheduledJob'] = self._printJob.__dict__()
+
+        return result
+
+    def _handleScheduleJob(self, jobData):
+        from flask import make_response
+        time = datetime.fromtimestamp(jobData["time"]/1000)
+        errors = []
+
+        if not jobData["file"]:
+            errors.append({
+                'msg': "Please provide a gcode file for the scheduled print job!",
+                'parameter': "file"
+            })
+        else:
+            path = f'{self._printerControl.autoprintFolder}/{jobData["file"]}'
+            try:
+                pj = PrintJob(path,
+                              time, jobData["turnOffAfterPrint"],
+                              jobData["startFinish"],
+                              self._logger,
+                              self._file_manager)
+                self._printJob = pj
+
+            except PrintJobTooEarly as e:
+                errors.append({
+                    'msg': e.message,
+                    'parameter': 'time'
+                })
+
+        if len(errors) > 0:
+            return make_response({"errors": errors}, 400)
+        else:
+            return make_response(self._printJob.__dict__(), 200)
 
     # ~~ Softwareupdate hook
 
