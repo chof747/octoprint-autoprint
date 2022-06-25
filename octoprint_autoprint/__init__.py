@@ -30,7 +30,7 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
     # ~~ Startup Plugin
 
     def on_after_startup(self):
-        self._printerControl = PrinterControl(self._logger)
+        self._printerControl = PrinterControl(self._logger, self._printer)
         self.assignSettings()
 
     # ~  TemplatePlugin mixin

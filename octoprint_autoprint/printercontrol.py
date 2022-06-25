@@ -1,10 +1,14 @@
 from logging import Logger
 import RPi.GPIO as GPIO
+from time import sleep
+from octoprint.printer import PrinterInterface
 
+CONNECTION_WAIT = 1
+CONNECTION_TIMEOUT_REPEAT = 5
 
 class PrinterControl:
 
-    def __init__(self, logger: Logger) -> None:
+    def __init__(self, logger: Logger, printer: PrinterInterface) -> None:
         self._statePrinter = False
         self._stateLight = False
         self._gpioPrinter = None
@@ -15,11 +19,27 @@ class PrinterControl:
         GPIO.setmode(GPIO.BCM)
 
         self._logger = logger
+        self._printer = printer
 
-    def startUpPrinter(self):
+    def startUpPrinter(self) -> bool:
         """Command that starts up the printer and turns on the light"""
         self._switchPrinter(True)
         self._switchLight(True)
+        
+        sleep(self._startupTime)
+        self._printer.connect()
+
+        c = 0
+        while (c<CONNECTION_TIMEOUT_REPEAT) and (not self._printer.is_operational()):
+            sleep(CONNECTION_WAIT)
+
+        if (self._printer.is_operational()):
+            self._logger.info("Connected to printer")
+            return True
+        else:
+            self._logger.warn("Printer connection could not be established immideately - try further actions later!")
+            return False
+
 
     def shutDownPrinter(self):
         """Command that starts up the printer and turns on the light"""
