@@ -12,6 +12,7 @@ from __future__ import absolute_import
 import octoprint.plugin
 
 from .printercontrol import PrinterControl
+from octoprint.printer import PrinterInterface
 from datetime import datetime
 from .printjob import PrintJob, PrintJobTooEarly
 
@@ -30,7 +31,7 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
     # ~~ Startup Plugin
 
     def on_after_startup(self):
-        self._printerControl = PrinterControl(self._logger)
+        self._printerControl = PrinterControl(self._logger, self._printer)
         self.assignSettings()
 
     # ~  TemplatePlugin mixin
@@ -107,6 +108,7 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
         return {
             "startUpPrinter": [],
             "shutDownPrinter": [],
+            "cancelShutDown" : [],
             "printWaiting": [],
             "toggleLight": [],
             "scheduleJob": [
@@ -119,6 +121,8 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
             self._printerControl.startUpPrinter()
         elif "shutDownPrinter" == command:
             self._printerControl.shutDownPrinter()
+        elif "cancelShutDown" == command:
+            self._printerControl.cancelShutDown()
         elif "toggleLight" == command:
             self._printerControl.toggleLight()
         elif "scheduleJob" == command:
@@ -128,7 +132,9 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
         result = {
             'state': {
                 'printer': self._printerControl.isPrinterOn,
-                'light': self._printerControl.isLightOn
+                'light': self._printerControl.isLightOn,
+                'cooldown' : self._printerControl.isCoolingDown,
+                'connected' : self._printer.is_operational()
             }
         }
 
