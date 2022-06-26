@@ -107,6 +107,7 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
         return {
             "startUpPrinter": [],
             "shutDownPrinter": [],
+            "cancelShutDown" : [],
             "printWaiting": [],
             "toggleLight": [],
             "scheduleJob": [
@@ -119,6 +120,8 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
             self._printerControl.startUpPrinter()
         elif "shutDownPrinter" == command:
             self._printerControl.shutDownPrinter()
+        elif "cancelShutDown" == command:
+            self._printerControl.cancelShutDown()
         elif "toggleLight" == command:
             self._printerControl.toggleLight()
         elif "scheduleJob" == command:
@@ -128,7 +131,8 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
         result = {
             'state': {
                 'printer': self._printerControl.isPrinterOn,
-                'light': self._printerControl.isLightOn
+                'light': self._printerControl.isLightOn,
+                'cooldown' : self._printerControl.isCoolingDown
             }
         }
 

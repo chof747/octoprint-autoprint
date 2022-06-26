@@ -6,11 +6,15 @@ table.printerControl td {
 }
 
 i.toggleOn {
-    color: #F8D65B
+    color: #F8D65B;
 }
 
 i.toggleOff {
-    color: black
+    color: black;
+}
+
+i.coolDown {
+    color: cadetblue;
 }
 
 a.button, a:hover, a:focus, a:active {

@@ -3,13 +3,14 @@
   <table class="printerControl">
     <tr>
       <td>
-        <button class="btn" data-bind="click: startUpPrinter, hidden: state.printer">{{ _('Start up Printer') }}</button>
-        <button class="btn" data-bind="click: shutDownPrinter, visible: state.printer">{{ _('Shut Down Printer') }}</button></div></td>
+        <button class="btn" data-bind="click: startUpPrinter, visible: !state.printer()">{{ _('Start up Printer') }}</button>
+        <button class="btn" data-bind="click: shutDownPrinter, visible: (state.printer() && (!state.cooldown()))">{{ _('Shut Down Printer') }}</button>
+        <button class="btn" data-bind="click: cancelShutDown, visible: (state.printer() && state.cooldown())">{{ _('Cancel Shut Down') }}</button></td>
       <td>
         <a class="button" data-bind="click: toggleLight"><i class="fas fa-lightbulb fa-2x" data-bind="css: { toggleOn: state.light, toggleOff: !state.light }"></i>
         <br/>{{ _('Lights') }}</td>   
       <td>
-        <i class="fas fa-print fa-2x" data-bind="css: { toggleOn: state.printer, toggleOff: !state.printer }"></i>
+        <i class="fas fa-print fa-2x" data-bind="css: { toggleOn: (state.printer() && (!state.cooldown())), coolDown: (state.printer() && state.cooldown()), toggleOff: !state.printer }"></i>
         <br/>{{ _('Printer') }}
       </td>
     </tr>
