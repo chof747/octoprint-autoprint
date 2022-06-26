@@ -12,6 +12,7 @@ from __future__ import absolute_import
 import octoprint.plugin
 
 from .printercontrol import PrinterControl
+from octoprint.printer import PrinterInterface
 from datetime import datetime
 from .printjob import PrintJob, PrintJobTooEarly
 
@@ -132,7 +133,8 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
             'state': {
                 'printer': self._printerControl.isPrinterOn,
                 'light': self._printerControl.isLightOn,
-                'cooldown' : self._printerControl.isCoolingDown
+                'cooldown' : self._printerControl.isCoolingDown,
+                'connected' : self._printer.is_operational()
             }
         }
 

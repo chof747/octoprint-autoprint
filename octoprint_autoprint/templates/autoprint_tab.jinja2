@@ -10,7 +10,11 @@
         <a class="button" data-bind="click: toggleLight"><i class="fas fa-lightbulb fa-2x" data-bind="css: { toggleOn: state.light, toggleOff: !state.light }"></i>
         <br/>{{ _('Lights') }}</td>   
       <td>
-        <i class="fas fa-print fa-2x" data-bind="css: { toggleOn: (state.printer() && (!state.cooldown())), coolDown: (state.printer() && state.cooldown()), toggleOff: !state.printer }"></i>
+        <i class="fas fa-print fa-2x" 
+          data-bind="css: { toggleOn:  (state.printer() && !state.cooldown() && !state.connected()), 
+                            coolDown:  (state.printer() &&  state.cooldown()),
+                            connected: (state.printer() && !state.cooldown() &&  state.connected()), 
+                            toggleOff: !state.printer }"></i>
         <br/>{{ _('Printer') }}
       </td>
     </tr>

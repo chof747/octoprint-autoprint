@@ -26,22 +26,12 @@ class PrinterControl:
 
     def startUpPrinter(self) -> bool:
         """Command that starts up the printer and turns on the light"""
+
         self._switchPrinter(True)
         self._switchLight(True)
-        
-        sleep(self._startupTime)
-        self._printer.connect()
 
-        c = 0
-        while (c<CONNECTION_TIMEOUT_REPEAT) and (not self._printer.is_operational()):
-            sleep(CONNECTION_WAIT)
-
-        if (self._printer.is_operational()):
-            self._logger.info("Connected to printer")
-            return True
-        else:
-            self._logger.warn("Printer connection could not be established immideately - try further actions later!")
-            return False
+        connectTimer = ResettableTimer(self._startupTime, self._connectPrinter)        
+        connectTimer.start();
 
 
     def shutDownPrinter(self):
@@ -78,6 +68,10 @@ class PrinterControl:
         return tempOK
 
     def _shutDown(self):
+            self._printer.disconnect();
+
+            while (not self._printer.is_closed_or_error()): 
+                pass
             self._switchPrinter(False)
             self._switchLight(False)
 
@@ -89,6 +83,9 @@ class PrinterControl:
         GPIO.output(pin, state)
 
         return state
+
+    def _connectPrinter(self):
+        self._printer.connect()
 
     def _switchLight(self, state):
         GPIO.output(self._gpioLight, state)
