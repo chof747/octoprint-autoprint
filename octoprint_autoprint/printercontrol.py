@@ -72,6 +72,7 @@ class PrinterControl:
 
             while (not self._printer.is_closed_or_error()): 
                 pass
+            
             self._switchPrinter(False)
             self._switchLight(False)
 
