@@ -1,4 +1,3 @@
-from lib2to3.pygram import python_grammar_no_print_statement
 from logging import Logger
 from datetime import datetime, timedelta
 from math import ceil
@@ -45,6 +44,21 @@ class PrintJob:
             "startTime": self._startTime.timestamp()*1000
         }
 
+    # ~Properties
+
+    def _getSecondsToStart(self):
+        return (datetime.now() - self._startTime).total_seconds()
+
+    secondsToStart = property(_getSecondsToStart, None, None,
+                            "The time in second until the printjob should start")
+
+    def _getJobFile(self):
+        return self._jobFile
+
+    fileToPrint = property(_getJobFile, None, None,
+                            "Filename of the file to print")
+
+
 class PrintJobTooEarly(Exception):
 
     def __init__(self, delay):
@@ -61,3 +75,4 @@ class PrintJobTooEarly(Exception):
 
         self.message = f"Printjob is scheduled too early (move by {delay_suitable} {time_unit})."
         super().__init__(self.message)
+
