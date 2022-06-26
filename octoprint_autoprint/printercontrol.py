@@ -42,7 +42,7 @@ class PrinterControl:
             self._shutDown()
         else:
             self._logger.debug("Wait a few seconds for tool to cooldown")
-            self._cooldownTimer = ResettableTimer(TEMP_WAIT_CYCLE, PrinterControl.shutDownPrinter, [self])
+            self._cooldownTimer = ResettableTimer(TEMP_WAIT_CYCLE, self.shutDownPrinter)
             self._cooldownTimer.start()
 
     def cancelShutDown(self):
