@@ -1,10 +1,16 @@
 from logging import Logger
 import RPi.GPIO as GPIO
+from time import sleep
+from octoprint.printer import PrinterInterface
+from octoprint.util import ResettableTimer
 
+CONNECTION_WAIT = 1
+CONNECTION_TIMEOUT_REPEAT = 5
+TEMP_WAIT_CYCLE = 5
 
 class PrinterControl:
 
-    def __init__(self, logger: Logger) -> None:
+    def __init__(self, logger: Logger, printer: PrinterInterface) -> None:
         self._statePrinter = False
         self._stateLight = False
         self._gpioPrinter = None
@@ -15,22 +21,60 @@ class PrinterControl:
         GPIO.setmode(GPIO.BCM)
 
         self._logger = logger
+        self._printer = printer
+        self._cooldownTimer = None
 
-    def startUpPrinter(self):
+    def startUpPrinter(self) -> bool:
         """Command that starts up the printer and turns on the light"""
+
         self._switchPrinter(True)
         self._switchLight(True)
 
+        connectTimer = ResettableTimer(self._startupTime, self._connectPrinter)        
+        connectTimer.start();
+
+
     def shutDownPrinter(self):
-        """Command that starts up the printer and turns on the light"""
-        self._switchPrinter(False)
-        self._switchLight(False)
+        """Command that shutdowns the printer and turns off the light"""
+
+        if (self._checkTemperatures()):
+            self._cooldownTimer = None
+            self._shutDown()
+        else:
+            self._logger.debug("Wait a few seconds for tool to cooldown")
+            self._cooldownTimer = ResettableTimer(TEMP_WAIT_CYCLE, PrinterControl.shutDownPrinter, [self])
+            self._cooldownTimer.start()
+
+    def cancelShutDown(self):
+        """Cancel a given shutdown command"""
+        if (None != self._cooldownTimer):
+            self._cooldownTimer.cancel();
+            self._cooldownTimer = None;
 
     def toggleLight(self):
         """Command to toggle the state of the light"""
         self._switchLight(not self._stateLight)
 
 # ~~ Private helper Methods
+
+    def _checkTemperatures(self):
+        tempData = self._printer.get_current_temperatures()
+        tempOK = True
+        
+        for temp in [t for k,t in tempData.items() if 'tool' in k]:
+            self._logger.debug(temp)
+            tempOK = tempOK and (temp['actual'] <= self._cooldownTemp)
+
+        return tempOK
+
+    def _shutDown(self):
+            self._printer.disconnect();
+
+            while (not self._printer.is_closed_or_error()): 
+                pass
+            
+            self._switchPrinter(False)
+            self._switchLight(False)
 
     def _prepGPIOPin(self, pin) -> bool:
         GPIO.setup(pin, GPIO.IN)
@@ -40,6 +84,9 @@ class PrinterControl:
         GPIO.output(pin, state)
 
         return state
+
+    def _connectPrinter(self):
+        self._printer.connect()
 
     def _switchLight(self, state):
         GPIO.output(self._gpioLight, state)
@@ -123,6 +170,10 @@ class PrinterControl:
 
     cooldownTemp = property(_getCooldownTemp, _setCooldownTemp,
                             None, "The nozzle cooldown temperature Threshold")
+
+    @property
+    def isCoolingDown(self):
+        return (None != self._cooldownTimer)
 
     def _getAutoprintFolder(self):
         return self._autoprintFolder
