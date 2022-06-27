@@ -3,7 +3,7 @@ layout: plugin
 
 id: autoprint
 title: OctoPrint-Autoprint
-description: Tool to automatically start prints remotely
+description: Tool to automatically start the printer and prints remotely
 authors:
 - Christian Hofbauer
 license: AGPLv3
@@ -80,10 +80,7 @@ compatibility:
   # operating systems being supported.
 
   os:
-  - linux
-  - windows
-  - macos
-  - freebsd
+  - raspbian
 
   # Compatible Python version
   #

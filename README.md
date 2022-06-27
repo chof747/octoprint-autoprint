@@ -37,6 +37,10 @@ and use `pip install .`to install the plugin
    ```sh
    source <Directory of your OctoPrint DevEnv>/venv/bin/activate
    ```
+   On the first setup outside of a raspberry pi please also install the RPi.GPIO simulation library in the virtual environment:
+   ```sh
+   pip install git+https://github.com/nosix/raspberry-gpio-emulator/
+   ```
 
 3. Start octoprint always from your plugin directory (in the virtual environment as described    in  2) with:
    ```sh 

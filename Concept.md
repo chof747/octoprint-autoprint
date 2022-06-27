@@ -78,3 +78,12 @@ The user interacts with the plugin on two different points:
 - In the **autprint tab** the user can control the printer and light switches, start up and shut
   down the printer and control the printer start time
 
+
+Hardware Setup
+-------------------------------
+
+Below is a reference hardware setup that is needed to be able to use the plugin with your 3D printer. The plugin is designed to control your printer's power supply as well as the power supply via two GPIO pins of a raspberry pi. You could use e.g. two relais to switch the power supply to the printer and the power supply to a light source that is used to provide light for a webcam to cover your prints.
+
+In the setup below one mains input is splitted to two outputs while the phase (brown line) is passed through the relais to allow controlling it via the GPIOs. Please note that the relais Vin should be connected to the Pi's 5V pins as the 3v3 output is not suitable for the currents needed by the relais when switching.
+
+![](extras/autoprint_schematic.png)
