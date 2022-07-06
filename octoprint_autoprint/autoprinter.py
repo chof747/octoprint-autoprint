@@ -1,3 +1,4 @@
+from time import sleep
 from octoprint.util import ResettableTimer
 from octoprint.printer import PrinterInterface
 from logging import Logger
@@ -11,7 +12,7 @@ class AutoPrinterTimer:
     Controller that waits until the time is ready and then starts the printer as well as the selected print
     """
 
-    def __init__(self, printer: PrinterInterface, logger: Logger, printerControl : PrinterControl) -> None:
+    def __init__(self, logger: Logger, printer: PrinterInterface, printerControl : PrinterControl) -> None:
         self._logger = logger
         self._printer = printer
         self._controller = printerControl
@@ -25,6 +26,7 @@ class AutoPrinterTimer:
             self._timer.cancel()
 
         self._job = job
+        self._logger.debug(f"Trigger timer in {job.secondsToStart}")
         self._timer = ResettableTimer(job.secondsToStart, self.startPrintJob)
         self._timer.start()
 
@@ -44,6 +46,14 @@ class AutoPrinterTimer:
     def startPrintJob(self) -> None:
 
         if (not self._printer.is_operational()):
-            if (self._controller.startUpPrinter()):
-                self._printer.select_file(self._job.fileToPrint, False, True)
-                self._printing = True
+            self._controller.startUpPrinter(self._runJob)
+        else:
+            self._runJob()
+    
+    def _runJob(self) -> None:
+            while not self._printer.is_operational():
+                self._logger.debug("Sleeping waiting for printer");
+                sleep(1)
+            self._logger.info("Starting Print Job")
+            self._printer.select_file(self._job.fileToPrint, False, True)
+            self._printing = True

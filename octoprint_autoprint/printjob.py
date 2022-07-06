@@ -27,8 +27,13 @@ class PrintJob:
         duration = 0
         if ("finish" == self.startFinish):
             metadata = self._fileManager.get_metadata("local", self._jobFile)
-            duration =metadata['analysis']['estimatedPrintTime']
-            duration += 60 - (duration % 60)
+            if ('analysis' in metadata) and ('estimatedPrintTime' in metadata['analysis']):
+                duration =metadata['analysis']['estimatedPrintTime']
+                duration += 60 - (duration % 60)
+            else:
+                self._logger.warn(f"No estimated print time available use time as start time!")
+                duration = 0
+                
             self._logger.info(f"Adjusting time by {duration} seconds to finish at {self._time.isoformat()}")
 
         self._startTime = self._time - timedelta(seconds=duration)
@@ -47,7 +52,7 @@ class PrintJob:
     # ~Properties
 
     def _getSecondsToStart(self):
-        return (datetime.now() - self._startTime).total_seconds()
+        return (self._startTime - datetime.now()).total_seconds()
 
     secondsToStart = property(_getSecondsToStart, None, None,
                             "The time in second until the printjob should start")
