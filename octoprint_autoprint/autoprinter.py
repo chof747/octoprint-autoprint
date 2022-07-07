@@ -26,7 +26,7 @@ class AutoPrinterTimer:
             self._timer.cancel()
 
         self._job = job
-        self._logger.debug(f"Trigger timer in {job.secondsToStart}")
+        self._logger.info(f"Trigger  autoprint timer in {job.secondsToStart}")
         self._timer = ResettableTimer(job.secondsToStart, self.startPrintJob)
         self._timer.start()
 
@@ -40,8 +40,9 @@ class AutoPrinterTimer:
 
     def processPrintJobEnd(self, printEvent: dict):
         if (self._printing) and (self._job != None) and (self._job.fileToPrint == printEvent.get("path")):
-            self._controller.shutDownPrinter();
-            
+            self._prrinting = False
+            if self._job.turnOffAfter:
+                self._controller.shutDownPrinter();
             
     def startPrintJob(self) -> None:
 
@@ -52,7 +53,6 @@ class AutoPrinterTimer:
     
     def _runJob(self) -> None:
             while not self._printer.is_operational():
-                self._logger.debug("Sleeping waiting for printer");
                 sleep(1)
             self._logger.info("Starting Print Job")
             self._printer.select_file(self._job.fileToPrint, False, True)

@@ -33,7 +33,7 @@ class PrintJob:
             else:
                 self._logger.warn(f"No estimated print time available use time as start time!")
                 duration = 0
-                
+
             self._logger.info(f"Adjusting time by {duration} seconds to finish at {self._time.isoformat()}")
 
         self._startTime = self._time - timedelta(seconds=duration)
@@ -62,6 +62,11 @@ class PrintJob:
 
     fileToPrint = property(_getJobFile, None, None,
                             "Filename of the file to print")
+
+    def _setTurnOffAfter(self, turnOff) -> None:
+        self._turnOffAfter = True if turnOff else False
+
+    turnOffAfter = property(lambda self: self._turnOffAfter, _setTurnOffAfter)
 
 
 class PrintJobTooEarly(Exception):

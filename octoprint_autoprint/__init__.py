@@ -23,7 +23,8 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
                       octoprint.plugin.SettingsPlugin,
                       octoprint.plugin.AssetPlugin,
                       octoprint.plugin.TemplatePlugin,
-                      octoprint.plugin.SimpleApiPlugin
+                      octoprint.plugin.SimpleApiPlugin,
+                      octoprint.plugin.EventHandlerPlugin
                       ):
 
     def __init__(self) -> None:
@@ -180,6 +181,12 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
             return make_response({"errors": errors}, 400)
         else:
             return make_response(self._printJob.__dict__(), 200)
+
+    def on_event(self, event, payload):
+        if (("PrintFailed" == event) or ("PrintDone" == event)) and (None != self._printJob):
+            self._logger.debug(payload)
+            self._autoprinterTimer.processPrintJobEnd(payload)
+        return super().on_event(event, payload)
 
     # ~~ Softwareupdate hook
 
