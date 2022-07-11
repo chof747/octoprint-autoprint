@@ -84,7 +84,7 @@
       </tr>
       <tr>
         <td>Starting at</td>
-        <td><span data-bind="text: scheduledJob.startTime"/></td>
+        <td><span data-bind="text: (new Date(scheduledJob.startTime())).toLocaleString()"/></td>
       </tr>
        <tr>
         <td>Turn off printer when done</td>
