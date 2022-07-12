@@ -40,7 +40,8 @@ class AutoPrinterTimer:
 
     def processPrintJobEnd(self, printEvent: dict):
         if (self._printing) and (self._job != None) and (self._job.fileToPrint == printEvent.get("path")):
-            self._prrinting = False
+            self._logger.info("Printjob ended will %s the printer" % ("shutdown" if self._job.turnOffAfter else "leave on"))
+            self._printing = False
             if self._job.turnOffAfter:
                 self._controller.shutDownPrinter();
             
