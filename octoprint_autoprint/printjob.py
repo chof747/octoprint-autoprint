@@ -1,4 +1,3 @@
-from lib2to3.pygram import python_grammar_no_print_statement
 from logging import Logger
 from datetime import datetime, timedelta
 from math import ceil
@@ -28,8 +27,13 @@ class PrintJob:
         duration = 0
         if ("finish" == self.startFinish):
             metadata = self._fileManager.get_metadata("local", self._jobFile)
-            duration =metadata['analysis']['estimatedPrintTime']
-            duration += 60 - (duration % 60)
+            if ('analysis' in metadata) and ('estimatedPrintTime' in metadata['analysis']):
+                duration =metadata['analysis']['estimatedPrintTime']
+                duration += 60 - (duration % 60)
+            else:
+                self._logger.warn(f"No estimated print time available use time as start time!")
+                duration = 0
+
             self._logger.info(f"Adjusting time by {duration} seconds to finish at {self._time.isoformat()}")
 
         self._startTime = self._time - timedelta(seconds=duration)
@@ -42,8 +46,29 @@ class PrintJob:
         return {
             "file": self._jobFile,
             "time": self._time.timestamp()*1000,
-            "startTime": self._startTime.timestamp()*1000
+            "startTime": self._startTime.timestamp()*1000,
+            "turnOffAfter" : self._turnOffAfter
         }
+
+    # ~Properties
+
+    def _getSecondsToStart(self):
+        return (self._startTime - datetime.now()).total_seconds()
+
+    secondsToStart = property(_getSecondsToStart, None, None,
+                            "The time in second until the printjob should start")
+
+    def _getJobFile(self):
+        return self._jobFile
+
+    fileToPrint = property(_getJobFile, None, None,
+                            "Filename of the file to print")
+
+    def _setTurnOffAfter(self, turnOff) -> None:
+        self._turnOffAfter = True if turnOff else False
+
+    turnOffAfter = property(lambda self: self._turnOffAfter, _setTurnOffAfter)
+
 
 class PrintJobTooEarly(Exception):
 
@@ -61,3 +86,4 @@ class PrintJobTooEarly(Exception):
 
         self.message = f"Printjob is scheduled too early (move by {delay_suitable} {time_unit})."
         super().__init__(self.message)
+

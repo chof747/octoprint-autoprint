@@ -32,7 +32,10 @@
         <div class="input">
           <select data-bind="options: list.file, optionsCaption: '', value: autoprint.file">
           </select>
-        </div>
+          &nbsp;  
+          <a class="button" data-bind="click: updateFiles"><i class="fas fa-sync fa-1x"></i></a>   
+        </div> 
+
         <div id="file_error" class="alert-box alert alert-error" data-bind="visible: errormsgs.file">
           <p>
             <b>Error:</b> <span data-bind="text: errormsgs.file"></span>
@@ -84,7 +87,7 @@
       </tr>
       <tr>
         <td>Starting at</td>
-        <td><span data-bind="text: scheduledJob.startTime"/></td>
+        <td><span data-bind="text: (new Date(scheduledJob.startTime())).toLocaleString()"/></td>
       </tr>
        <tr>
         <td>Turn off printer when done</td>

@@ -1,5 +1,6 @@
 # coding=utf-8
 from __future__ import absolute_import
+import imp
 
 # (Don't forget to remove me)
 # This is a basic skeleton for your plugin's __init__.py. You probably want to adjust the class name of your plugin
@@ -15,13 +16,15 @@ from .printercontrol import PrinterControl
 from octoprint.printer import PrinterInterface
 from datetime import datetime
 from .printjob import PrintJob, PrintJobTooEarly
+from .autoprinter import AutoPrinterTimer
 
 
 class AutoprintPlugin(octoprint.plugin.StartupPlugin,
                       octoprint.plugin.SettingsPlugin,
                       octoprint.plugin.AssetPlugin,
                       octoprint.plugin.TemplatePlugin,
-                      octoprint.plugin.SimpleApiPlugin
+                      octoprint.plugin.SimpleApiPlugin,
+                      octoprint.plugin.EventHandlerPlugin
                       ):
 
     def __init__(self) -> None:
@@ -33,6 +36,7 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
     def on_after_startup(self):
         self._printerControl = PrinterControl(self._logger, self._printer)
         self.assignSettings()
+        self._autoprinterTimer = AutoPrinterTimer(self._logger, self._printer, self._printerControl)
 
     # ~  TemplatePlugin mixin
     def get_template_configs(self):
@@ -161,7 +165,11 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
                               jobData["startFinish"],
                               self._logger,
                               self._file_manager)
+
+                if (None != self._printJob):
+                    self._autoprinterTimer.cancelJob()
                 self._printJob = pj
+                self._autoprinterTimer.scheduleJob(pj)
 
             except PrintJobTooEarly as e:
                 errors.append({
@@ -173,6 +181,12 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
             return make_response({"errors": errors}, 400)
         else:
             return make_response(self._printJob.__dict__(), 200)
+
+    def on_event(self, event, payload):
+        if (("PrintFailed" == event) or ("PrintDone" == event)) and (None != self._printJob):
+            self._logger.debug(payload)
+            self._autoprinterTimer.processPrintJobEnd(payload)
+        return super().on_event(event, payload)
 
     # ~~ Softwareupdate hook
 

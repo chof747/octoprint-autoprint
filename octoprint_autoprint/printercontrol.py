@@ -24,14 +24,14 @@ class PrinterControl:
         self._printer = printer
         self._cooldownTimer = None
 
-    def startUpPrinter(self) -> bool:
+    def startUpPrinter(self, callback = None) -> bool:
         """Command that starts up the printer and turns on the light"""
 
         self._switchPrinter(True)
         self._switchLight(True)
 
-        connectTimer = ResettableTimer(self._startupTime, self._connectPrinter)        
-        connectTimer.start();
+        connectTimer = ResettableTimer(self._startupTime, self._connectPrinter, [callback])        
+        connectTimer.start();   
 
 
     def shutDownPrinter(self):
@@ -42,7 +42,7 @@ class PrinterControl:
             self._shutDown()
         else:
             self._logger.debug("Wait a few seconds for tool to cooldown")
-            self._cooldownTimer = ResettableTimer(TEMP_WAIT_CYCLE, PrinterControl.shutDownPrinter, [self])
+            self._cooldownTimer = ResettableTimer(TEMP_WAIT_CYCLE, self.shutDownPrinter)
             self._cooldownTimer.start()
 
     def cancelShutDown(self):
@@ -85,8 +85,9 @@ class PrinterControl:
 
         return state
 
-    def _connectPrinter(self):
+    def _connectPrinter(self, callback):
         self._printer.connect()
+        callback()
 
     def _switchLight(self, state):
         GPIO.output(self._gpioLight, state)
@@ -176,6 +177,8 @@ class PrinterControl:
         return (None != self._cooldownTimer)
 
     def _getAutoprintFolder(self):
+        if (self._autoprintFolder[0] == '/'):
+            return self._autoprintFolder[1:]
         return self._autoprintFolder
 
     def _setAutoprintFolder(self, folder):
