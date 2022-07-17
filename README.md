@@ -5,7 +5,7 @@ The octoprint autoprint plugin has the following functionalities:
 1. Enable the remote powering on/off of a printer and a light above the printer via two distinct
    GPIO pins (which are most likely connected to relais) - also exposing these GPIOs
 2. Automatically disconnect and turn off the printer after a print is finished - with the option
-   to wait for a proper cool down
+   to wait for a proper cool down of the nozzle
 3. Start the printer and begin printing a specific file either at a given time or at a time
    so that the print will be finished as specified 
 
