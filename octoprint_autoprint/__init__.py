@@ -29,14 +29,14 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
 
     def __init__(self) -> None:
         super().__init__()
-        self._printJob = None
 
     # ~~ Startup Plugin
 
     def on_after_startup(self):
         self._printerControl = PrinterControl(self._logger, self._printer)
         self.assignSettings()
-        self._autoprinterTimer = AutoPrinterTimer(self._logger, self._printer, self._printerControl)
+        self._autoprinterTimer = AutoPrinterTimer(
+            self._logger, self._printer, self._printerControl)
 
     # ~  TemplatePlugin mixin
     def get_template_configs(self):
@@ -112,12 +112,13 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
         return {
             "startUpPrinter": [],
             "shutDownPrinter": [],
-            "cancelShutDown" : [],
+            "cancelShutDown": [],
             "printWaiting": [],
             "toggleLight": [],
             "scheduleJob": [
                 "file", "time", "startFinish", "turnOffAfterPrint"
-            ]
+            ],
+            "cancelJob": []
         }
 
     def on_api_command(self, command, data):
@@ -131,19 +132,22 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
             self._printerControl.toggleLight()
         elif "scheduleJob" == command:
             return self._handleScheduleJob(data)
+        elif "cancelJob" == command:
+            return self._cancelScheduledJob()
 
     def on_api_get(self, request):
         result = {
             'state': {
                 'printer': self._printerControl.isPrinterOn,
                 'light': self._printerControl.isLightOn,
-                'cooldown' : self._printerControl.isCoolingDown,
-                'connected' : self._printer.is_operational()
+                'cooldown': self._printerControl.isCoolingDown,
+                'connected': self._printer.is_operational(),
+                'printInProgress': self._printer.is_printing() or self._printer.is_pausing() or self._printer.is_paused()
             }
         }
 
-        if None != self._printJob:
-            result['scheduledJob'] = self._printJob.__dict__()
+        if None != self._autoprinterTimer.job:
+            result['scheduledJob'] = self._autoprinterTimer.job.__dict__()
 
         return result
 
@@ -166,9 +170,8 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
                               self._logger,
                               self._file_manager)
 
-                if (None != self._printJob):
+                if (None != self._autoprinterTimer.job):
                     self._autoprinterTimer.cancelJob()
-                self._printJob = pj
                 self._autoprinterTimer.scheduleJob(pj)
 
             except PrintJobTooEarly as e:
@@ -180,10 +183,14 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
         if len(errors) > 0:
             return make_response({"errors": errors}, 400)
         else:
-            return make_response(self._printJob.__dict__(), 200)
+            return make_response(self._autoprinterTimer.job.__dict__(), 200)
+
+    def _cancelScheduledJob(self):
+        if (None != self._autoprinterTimer.job):
+            self._autoprinterTimer.cancelJob()
 
     def on_event(self, event, payload):
-        if (("PrintFailed" == event) or ("PrintDone" == event)) and (None != self._printJob):
+        if (("PrintFailed" == event) or ("PrintDone" == event)) and (None != self._autoprinterTimer.job):
             self._logger.debug(payload)
             self._autoprinterTimer.processPrintJobEnd(payload)
         return super().on_event(event, payload)
