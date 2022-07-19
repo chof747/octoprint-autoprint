@@ -35,8 +35,10 @@ class AutoPrinterTimer:
 
         if (self._timer != None):
             self._timer.cancel();
+            self._logger.info(f"Cancelling printjob for {self._job.fileToPrint} to be started in {self._job.secondsToStart} seconds.")
             self._timer = None
             self._job = None
+
 
     def processPrintJobEnd(self, printEvent: dict):
         if (self._printing) and (self._job != None) and (self._job.fileToPrint == printEvent.get("path")):
@@ -44,6 +46,10 @@ class AutoPrinterTimer:
             self._printing = False
             if self._job.turnOffAfter:
                 self._controller.shutDownPrinter();
+            
+            self._timer = None
+            self._job = None
+
             
     def startPrintJob(self) -> None:
 
@@ -58,3 +64,8 @@ class AutoPrinterTimer:
             self._logger.info("Starting Print Job")
             self._printer.select_file(self._job.fileToPrint, False, True)
             self._printing = True
+
+    def _getJob(self):
+        return self._job
+
+    job = property(_getJob, scheduleJob, None, "Job to be scheduled")

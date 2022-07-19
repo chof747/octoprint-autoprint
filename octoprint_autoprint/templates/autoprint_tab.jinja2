@@ -20,7 +20,7 @@
     </tr>
   </table>
 </div>
-<div>
+<div data-bind="hidden: state.printInProgress">
   <h1>
     Autoprinting
   </h1>
@@ -76,9 +76,17 @@
       </div>
     </div>
   </div>
-  <div data-bind="visible: scheduledJob.file" class="alert-box alert alert-success scheduledjob">
+</div>
+<div data-bind="visible: state.printInProgress">
+ <div class="alert alert-block">
+        <p>
+            Note: Print is in progress, no autoscheduling possible during printing.</p>
+  </div>
+</div>
+<div data-bind="visible: scheduledJob.file" class="alert-box alert alert-success scheduledjob">
     <p>
-      <b>Scheduled Job</b>
+      <b><span data-bind="if: state.printInProgress">Selected</span>
+         <span data-bind="ifnot: state.printInProgress">Scheduled</span> Job</b>
     </p>
     <table>
       <tr>
@@ -93,6 +101,12 @@
         <td>Turn off printer when done</td>
         <td><span data-bind="text: scheduledJob.turnOffAfterPrint() ? 'yes' : 'no'"/></td>
       </tr>
+      <tr>
+        <td></td>
+        <td>
+          <button class="btn" data-bind="hidden: scheduledJob.file, click: cancelJob">{{ _('Cancel Print Job')}}</button>
+        </td>
     </table>
+      </div>
+    </div>
   </div>
-</div>

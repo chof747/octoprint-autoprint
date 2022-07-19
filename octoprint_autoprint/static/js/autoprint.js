@@ -20,7 +20,8 @@ $(function () {
             printer: ko.observable(false),
             light: ko.observable(false),
             cooldown: ko.observable(false),
-            connected: ko.observable(false)
+            connected: ko.observable(false),
+            printInProgress: ko.observable(false)
         };
 
         self.list = {
@@ -141,6 +142,12 @@ $(function () {
                 self.handlePrintJobError);
         }
 
+        self.cancelJob = function () {
+            OctoPrint.simpleApiCommand("autoprint", "cancelJob").then(
+                self.handlePrintJobSuccess
+            );
+        }
+
         /* 
         * Update Functions **************************************************************
         */
@@ -152,6 +159,7 @@ $(function () {
                 self.state.light(printer_state.state.light);
                 self.state.cooldown(printer_state.state.cooldown);
                 self.state.connected(printer_state.state.connected);
+                self.state.printInProgress(printer_state.state.printInProgress);
 
                 if (undefined !== printer_state.scheduledJob) {
                     self.updateScheduledJob(printer_state.scheduledJob);
@@ -160,9 +168,13 @@ $(function () {
         }
 
         self.updateScheduledJob = function (jobdata) {
-            self.scheduledJob.file(jobdata.file);
-            self.scheduledJob.startTime(jobdata.startTime);
-            self.scheduledJob.turnOffAfterPrint(jobdata.turnOffAfter);
+            if (undefined !== jobdata) {
+                self.scheduledJob.file(jobdata.file);
+                self.scheduledJob.startTime(jobdata.startTime);
+                self.scheduledJob.turnOffAfterPrint(jobdata.turnOffAfter);    
+            } else {
+                self.scheduledJob.file(undefined)
+            }
         }
 
         self.updateFolderList = function () {
