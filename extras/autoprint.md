@@ -9,7 +9,7 @@ authors:
 license: AGPLv3
 
 # TODO
-date: today's date in format YYYY-MM-DD, e.g. 2015-04-21
+date: 2022-07-21
 
 homepage: https://github.com/chof747/octoprint-autoprint
 source: https://github.com/chof747/octoprint-autoprint
@@ -27,22 +27,25 @@ tags:
 - psu
 - psucontrol
 
-# TODO
-# When registering a plugin on plugins.octoprint.org, all screenshots should be uploaded not linked from external sites.
 screenshots:
-- url: assets/img/plugins/autoprint/autoprint_settings.png
+- url: /assets/img/plugins/autoprint/autoprint_settings.png
   alt: Settings screenshot, describing the plugin configuration options
   caption: Settings
-- url: assets/img/plugins/autoprint/autoprint_tab.png
+- url: /assets/img/plugins/autoprint/autoprint_tab.png
   alt: Tab screenshot, describing the plugin controls
   caption: Settings
-- url: assets/img/plugins/autoprint/autoprint_schematic.png
+- url: /assets/img/plugins/autoprint/autoprint_schematic.png
   alt: Two relais are needed to be attached to two GPIO ports in order to turn on/off the printer via the plugin
   caption: Schematic of a GPIO setup
 
-# TODO
-featuredimage: url of a featured image for your plugin, /assets/img/...
+featuredimage: /assets/img/plugins/autoprint/featured_screenshot.png
 
+compatibility:
+
+  python: ">=3,<4" # Python 3 only
+  
+  os:
+  - linux
 
 ---
 
@@ -100,7 +103,8 @@ The plugin offers several options of useage:
    
    - Lights and printer are shut down
 
-   During the cooldown process you can cancel the shutdown of the printer at any time by pressing the button on  the top left which is in this phased labelled as "Cancel Shut Down"
+During the cooldown process you can cancel the shutdown of the printer at any time by pressing the button on  the top left which is in this phased labelled as "Cancel Shut Down"
+
 ---
   
 **Note:** The lights icon is also triggering the lights. When clicking on it you can toggle the state of the lights regardless of the state of the printer (e.g. for turning on the lights to check your printer while off or for turning them off while printing)
@@ -109,3 +113,22 @@ The plugin offers several options of useage:
 
 3. Autoprinting
 
+The plugin allows to schedule a print for a later time with the following options:
+
+- Select a file from a specific folder that has been defined in the settings
+- Choose either the start or the end time
+- Check wether the printer should shutdown after the print has finished
+
+The autoprint controls are available on the tab of the plugin (see picture below) and are only available if the printer is neither printing, paused nor pausing a print.
+
+A printed job can be cancelled any time before the print starts.
+
+---
+
+**Warning:** The plugin does not check any precondition for printing a scheduled job except the calculated time. Be therefore aware that the printbed and all other conditions must be given when scheduling a print job. There are no checks done by the plugin. The job is simply started regardless of the real conditions.
+
+---
+
+**Warning:** Be aware that running print jobs unattended is a security risk and should not be done in general.
+
+---
