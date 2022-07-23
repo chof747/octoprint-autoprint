@@ -84,29 +84,28 @@
   </div>
 </div>
 <div data-bind="visible: scheduledJob.file" class="alert-box alert alert-success scheduledjob">
-    <p>
-      <b><span data-bind="if: state.printInProgress">Selected</span>
-         <span data-bind="ifnot: state.printInProgress">Scheduled</span> Job</b>
-    </p>
-    <table>
+  <p>
+    <b><span data-bind="if: state.printInProgress">Selected</span>
+        <span data-bind="ifnot: state.printInProgress">Scheduled</span> Job</b>
+  </p>
+  <table>
+    <tr>
+      <td>Printjob File</td>
+      <td><span data-bind="text: scheduledJob.file"/></td>
+    </tr>
+    <tr>
+      <td>Starting at</td>
+      <td><span data-bind="text: (new Date(scheduledJob.startTime())).toLocaleString()"/></td>
+    </tr>
       <tr>
-        <td>Printjob File</td>
-        <td><span data-bind="text: scheduledJob.file"/></td>
-      </tr>
-      <tr>
-        <td>Starting at</td>
-        <td><span data-bind="text: (new Date(scheduledJob.startTime())).toLocaleString()"/></td>
-      </tr>
-       <tr>
-        <td>Turn off printer when done</td>
-        <td><span data-bind="text: scheduledJob.turnOffAfterPrint() ? 'yes' : 'no'"/></td>
-      </tr>
-      <tr>
-        <td></td>
-        <td>
-          <button class="btn" data-bind="hidden: scheduledJob.file, click: cancelJob">{{ _('Cancel Print Job')}}</button>
-        </td>
-    </table>
-      </div>
-    </div>
-  </div>
+      <td>Turn off printer when done</td>
+      <td><span data-bind="text: scheduledJob.turnOffAfterPrint() ? 'yes' : 'no'"/></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>
+        <button class="btn" data-bind="hidden: scheduledJob.file, click: cancelJob">{{ _('Cancel Print Job')}}</button>
+      </td>
+    </tr>
+  </table>
+</div>
