@@ -104,7 +104,7 @@
     <tr>
       <td></td>
       <td>
-        <button class="btn" data-bind="hidden: scheduledJob.file, click: cancelJob">{{ _('Cancel Print Job')}}</button>
+        <button class="btn" data-bind="hidden: state.printInProgress, click: cancelJob">{{ _('Cancel Print Job')}}</button>
       </td>
     </tr>
   </table>
