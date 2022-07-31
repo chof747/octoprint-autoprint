@@ -33,7 +33,21 @@ $(function () {
             startFinish: ko.observable('start'),
             time: ko.observable((new Date()).getTime()),
             file: ko.observable(),
-            folder: ko.observable()
+            folder: ko.observable(''),
+            setFolder: ko.computed({
+                read: function() {
+                    return self.folder;
+                },
+                write: function(folder) {
+                    if ((folder) && ('/' == folder[0]))
+                    {
+                        folder = folder.substring(1);
+                    }
+        
+                    self.autoprint.folder(folder);
+        
+                }
+            })
         };
 
         self.errormsgs = {
@@ -82,7 +96,7 @@ $(function () {
                 window.clearInterval(self.interval);
                 self.interval = undefined;
             }
-        }
+        };
 
         self.onBeforeBinding = function () {
             console.log(self.settings);
@@ -199,6 +213,7 @@ $(function () {
 
             OctoPrint.files.list(true).done(function (response) {
                 readFolder(response.files.sort(sortFileList));
+                result.unshift("/");
                 self.list.folder(result);
             })
         }
@@ -207,13 +222,24 @@ $(function () {
             var folder = self.autoprint.folder();
             var result = [];
 
-            if (folder) {
-                OctoPrint.files.listForLocation(`/local${folder}`, false).done(function (response) {
+            if (undefined !== folder) {
+                var path = [ 'local' ];
+                if (folder) {
+                    path.push(folder)
+                }
+
+                OctoPrint.files.listForLocation(path.join('/'), false).done(function (response) {
                     _.each(response.children, function (file) {
                         if (file.type == "machinecode") {
                             result.push(file.name);
                         }
                     })
+                    _.each(response.files, function(file) {
+                        if (file.type == "machinecode") {
+                            result.push(file.name);
+                        }
+                    })
+
                     self.list.file(result);
                 });
             }
