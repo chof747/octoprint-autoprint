@@ -162,6 +162,7 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
                 'parameter': "file"
             })
         else:
+            self._printerControl.autoprintFolder = jobData["folder"]
             path = f'{self._printerControl.autoprintFolder}/{jobData["file"]}'
             try:
                 pj = PrintJob(path,

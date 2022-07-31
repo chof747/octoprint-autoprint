@@ -32,7 +32,8 @@ $(function () {
             turnOffAfterPrint: ko.observable(false),
             startFinish: ko.observable('start'),
             time: ko.observable((new Date()).getTime()),
-            file: ko.observable()
+            file: ko.observable(),
+            folder: ko.observable()
         };
 
         self.errormsgs = {
@@ -132,6 +133,7 @@ $(function () {
         self.scheduleJob = function () {
             job = {
                 file: self.autoprint.file() || "",
+                folder: self.autoprint.folder() || "",
                 time: self.autoprint.time(),
                 turnOffAfterPrint: self.autoprint.turnOffAfterPrint(),
                 startFinish: self.autoprint.startFinish()
@@ -202,10 +204,10 @@ $(function () {
         }
 
         self.updateFiles = function () {
-            var folder = self.settings.settings.plugins.autoprint.folders.autoprint();
+            var folder = self.autoprint.folder();
             var result = [];
 
-            if ('' != folder) {
+            if (folder) {
                 OctoPrint.files.listForLocation(`/local${folder}`, false).done(function (response) {
                     _.each(response.children, function (file) {
                         if (file.type == "machinecode") {
