@@ -17,7 +17,6 @@ class PrinterControl:
         self._gpioLight = None
         self._startupTime = None
         self._cooldownTemp = None
-        self._autoprintFolder = None
         GPIO.setmode(GPIO.BCM)
 
         self._logger = logger
@@ -175,17 +174,3 @@ class PrinterControl:
     @property
     def isCoolingDown(self):
         return (None != self._cooldownTimer)
-
-    def _getAutoprintFolder(self):
-        if (self._autoprintFolder[0] == '/'):
-            return self._autoprintFolder[1:]
-        return self._autoprintFolder
-
-    def _setAutoprintFolder(self, folder):
-        if ("" != folder):
-            self._autoprintFolder = folder
-            self._logger.debug(
-                f"Set the autoprint folder to {folder}")
-
-    autoprintFolder = property(_getAutoprintFolder, _setAutoprintFolder, None,
-                               "Folder where files are stored that can be used for automatic start")

@@ -74,9 +74,6 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
             },
             "nozzle": {
                 "cooldownTemp": 60
-            },
-            "folders": {
-                "autoprint": ''
             }
         }
 
@@ -92,8 +89,6 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
             ["printer", "startupTime"])
         self._printerControl.cooldownTemp = self._settings.get(
             ["nozzle", "cooldownTemp"])
-        self._printerControl.autoprintFolder = self._settings.get(
-            ["folders", "autoprint"])
 
     # ~~ AssetPlugin mixin
 
@@ -116,7 +111,7 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
             "printWaiting": [],
             "toggleLight": [],
             "scheduleJob": [
-                "file", "time", "startFinish", "turnOffAfterPrint"
+                "file", "folder", "time", "startFinish", "turnOffAfterPrint"
             ],
             "cancelJob": []
         }

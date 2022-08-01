@@ -51,21 +51,5 @@
               is done, before the printer can be turned off. (To avoid leaving the filament too 
               long in a hot hotend)</span>
         </div>
-    </div>
- 
-    <div class="control-group">
-        <label class="control-label">{{ _('Autoprint folder') }}</label>
-        <div class="controls">
-            <div class="input">
-                <select data-bind="options: list.folder, optionsCaption: '', value: settings.settings.plugins.autoprint.folders.autoprint"></select>
-                &nbsp;  
-                <a class="button" data-bind="click: updateFolderList"><i class="fas fa-sync fa-1x"></i></a>   
-
-            </div>
-            <span class="help-inline">
-            This specifies the folder which can contain files that are eligable for autoprinting after start. Only files stored
-            in this folder can be selected in the autoprint tab.
-            </span>
-        </div>
-    </div>
+    </div> 
 </form> 
