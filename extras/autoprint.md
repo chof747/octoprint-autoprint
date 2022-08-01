@@ -77,7 +77,6 @@ The plugin can be configured with the following parameters (see also screenshot 
 | Printer Light               | GPIO Pin Number (BCM) | GPIO Pin triggering the lights of the printer - should also be connected to a relay or a MOSFET turning on/off a led strip |
 | Printer Startup Time        | Seconds               | Time delay the plugins waits after starting up the printer before it tries to connect to it
 | Nozzle Cooldown Temperature | °C                    | After printing or when getting a shutdown command, the plugin waits until the nozzle has cold down below this threshold to avoid turning off the printer with a too hot hotend | 
-| Autoprint Folder            | Folder Name           | Folder where prints are stored which are eligable for autoprinting |
 
 ### Operations
 
@@ -115,7 +114,7 @@ During the cooldown process you can cancel the shutdown of the printer at any ti
 
 The plugin allows to schedule a print for a later time with the following options:
 
-- Select a file from a specific folder that has been defined in the settings
+- Select a file from a any folder 
 - Choose either the start or the end time
 - Check wether the printer should shutdown after the print has finished
 
