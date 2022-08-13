@@ -15,6 +15,7 @@ $(function () {
 
         var self = this;
         self.settings = parameters[0];
+        self.filesViewModel = parameters[1];
         self.interval = undefined;
         self.state = {
             printer: ko.observable(false),
@@ -33,22 +34,25 @@ $(function () {
             startFinish: ko.observable('start'),
             time: ko.observable((new Date()).getTime()),
             file: ko.observable(),
-            folder: ko.observable(''),
-            setFolder: ko.computed({
-                read: function() {
-                    return self.folder;
-                },
-                write: function(folder) {
-                    if ((folder) && ('/' == folder[0]))
-                    {
-                        folder = folder.substring(1);
-                    }
-        
-                    self.autoprint.folder(folder);
-        
-                }
-            })
+            folder: ko.observable('')
         };
+
+        self.setFolder = ko.computed({
+            read: function() {
+                return "/" + this.autoprint.folder();
+            },
+            write: function(folder) {
+                if ((folder) && ('/' == folder[0]))
+                {
+                    folder = folder.substring(1);
+                }
+    
+                this.autoprint.folder(folder);
+    
+            },
+            owner : self
+        })
+
 
         self.errormsgs = {
             time: ko.observable(undefined),
@@ -114,6 +118,23 @@ $(function () {
 
         self.onEventFolderMoved = function () {
             self.updateFolderList();
+        }
+
+        self.filesViewModel.selectFileFromBrowser = function(/* String */ path)
+        {
+            var tokens = path.split("/");
+            var filename = tokens.pop();
+            var pathname = tokens.join("/");
+
+            self.autoprint.folder(pathname);
+            if( def = self.updateFiles())
+            {
+                def.done(function() {
+                    self.autoprint.file(filename);
+                });
+            }
+            
+
         }
 
         /* 
@@ -228,7 +249,7 @@ $(function () {
                     path.push(folder)
                 }
 
-                OctoPrint.files.listForLocation(path.join('/'), false).done(function (response) {
+                return OctoPrint.files.listForLocation(path.join('/'), false).done(function (response) {
                     _.each(response.children, function (file) {
                         if (file.type == "machinecode") {
                             result.push(file.name);
@@ -242,6 +263,10 @@ $(function () {
 
                     self.list.file(result);
                 });
+            }
+            else
+            {
+                return null;
             }
         };
 
@@ -267,6 +292,17 @@ $(function () {
             self.updateScheduledJob(data);
         }
 
+
+        $(document).ready(function() {
+			let regex = /<div class="btn-group action-buttons">([\s\S]*)<.div>/mi;
+			let template = '<div class="btn btn-mini" data-bind="click: function() { if ($root.loginState.isUser()) { $root.selectFileFromBrowser($data.path); } else { return; } }, css: {disabled: !$root.loginState.isUser()}" title="Select for auto printing"><i class="fa fa-calendar-o"></i></div>';
+
+          
+			$("#files_template_machinecode").text(function () {
+				return $(this).text().replace(regex, '<div class="btn-group action-buttons">$1	' + template + '></div>');
+			});
+        });
+
     };
 
     /* view model class, parameters for constructor, container to bind to
@@ -276,7 +312,7 @@ $(function () {
     OCTOPRINT_VIEWMODELS.push({
         construct: AutoprintViewModel,
         // ViewModels your plugin depends on, e.g. loginStateViewModel, settingsViewModel, ...
-        dependencies: ["settingsViewModel"],
+        dependencies: ["settingsViewModel", "filesViewModel"],
         // Elements to bind to, e.g. #settings_plugin_autoprint, #tab_plugin_autoprint, ...
         elements: ["#settings_plugin_autoprint", "#tab_plugin_autoprint"]
     });
