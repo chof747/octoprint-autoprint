@@ -37,6 +37,9 @@ screenshots:
 - url: /assets/img/plugins/autoprint/autoprint_schematic.png
   alt: Two relais are needed to be attached to two GPIO ports in order to turn on/off the printer via the plugin
   caption: Schematic of a GPIO setup
+- url: /assets/img/plugins/autoprint/autoprint_filebrowser-icon.png
+  alt: Showing the extra icon to select a file for autoprinting
+  caption: Settings
 
 featuredimage: /assets/img/plugins/autoprint/featured_screenshot.png
 
