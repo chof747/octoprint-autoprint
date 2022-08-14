@@ -31,7 +31,7 @@ $(function () {
         };
         self.autoprint = {
             turnOffAfterPrint: ko.observable(false),
-            startFinish: ko.observable('start'),
+            startFinish: ko.observable('asap'),
             time: ko.observable((new Date()).getTime()),
             file: ko.observable(),
             folder: ko.observable('')

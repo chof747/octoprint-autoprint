@@ -53,18 +53,20 @@
     <div class="control-group">
     </div>
     <div class="control-group">
-      <label class="control-label">{{ _('Time printer to') }}
+      <label class="control-label">{{ _('Print should ... ') }}
       </label>
       <div class="controls radio">
+        <input type="radio" name="startFinish" value="asap" id="startFinish-start" data-bind="checked: autoprint.startFinish"/>
+        <label for="startFinish-start">{{ _('start immediately')}}</i></label>
         <input type="radio" name="startFinish" value="start" id="startFinish-start" data-bind="checked: autoprint.startFinish"/>
-        <label for="startFinish-start">{{ _('start at')}}</i></label>
+        <label for="startFinish-start">{{ _('start at ...')}}</i></label>
         <input type="radio" name="startFinish" value="finish" id="startFinish-end" data-bind="checked: autoprint.startFinish"/>
         <label for="startFinish-end">{{ _('finish at')}} ...</label>
       </div>
     </div>
     <div class="control-group">
       <div class="controls">
-        <input type="datetime-local" id="timerTime" data-bind="value: timeDisplay"/>
+        <input type="datetime-local" id="timerTime" data-bind="value: timeDisplay, visible: ('asap' != autoprint.startFinish())"/>
         <div id="timerTime_error" class="alert-box alert alert-error" data-bind="visible: errormsgs.time">
           <p>
             <b>Error:</b> <span data-bind="text: errormsgs.time"></span>

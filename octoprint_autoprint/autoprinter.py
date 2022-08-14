@@ -56,6 +56,7 @@ class AutoPrinterTimer:
         if (not self._printer.is_operational()):
             self._controller.startUpPrinter(self._runJob)
         else:
+            self._controller.cancelShutDown();
             self._runJob()
     
     def _runJob(self) -> None:

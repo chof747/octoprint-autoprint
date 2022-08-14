@@ -1,6 +1,7 @@
 from logging import Logger
 from datetime import datetime, timedelta
 from math import ceil
+from datetime import datetime
 
 from octoprint.filemanager import FileManager
 
@@ -19,13 +20,16 @@ class PrintJob:
         self._time = time
         self._startTime = None
         self._turnOffAfter = turnoffAfter
-        self.startFinish = startFinish
-
-        self._calcStartTime()
+        self._startFinish = startFinish
+        
+        if ("asap" != self._startFinish):
+            self._calcStartTime()
+        else:
+            self._startTime = datetime.now()
 
     def _calcStartTime(self):
         duration = 0
-        if ("finish" == self.startFinish):
+        if ("finish" == self._startFinish):
             metadata = self._fileManager.get_metadata("local", self._jobFile)
             if ('analysis' in metadata) and ('estimatedPrintTime' in metadata['analysis']):
                 duration =metadata['analysis']['estimatedPrintTime']
@@ -53,7 +57,10 @@ class PrintJob:
     # ~Properties
 
     def _getSecondsToStart(self):
-        return (self._startTime - datetime.now()).total_seconds()
+        if ("asap" == self._startFinish):
+            return 0;
+        else:
+            return (self._startTime - datetime.now()).total_seconds()
 
     secondsToStart = property(_getSecondsToStart, None, None,
                             "The time in second until the printjob should start")
