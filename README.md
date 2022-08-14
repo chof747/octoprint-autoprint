@@ -45,8 +45,7 @@ and use `pip install .`to install the plugin
 3. Start octoprint always from your plugin directory (in the virtual environment as described    in  2) with:
    ```sh 
    tests/octoprint_dev.sh
-   ```
 
-## Configuration
+## Description
 
-**TODO:** Describe your plugin's configuration options (if any).
+For the description please refer to the [autoprint documentation](extras/autoprint.md)

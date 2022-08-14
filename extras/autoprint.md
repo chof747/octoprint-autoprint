@@ -118,7 +118,7 @@ During the cooldown process you can cancel the shutdown of the printer at any ti
 The plugin allows to schedule a print for a later time with the following options:
 
 - Select a file from a any folder
-- Choose either the start or the end time
+- Choose to start immediately or select either the start or the end time
 - Check wether the printer should shutdown after the print has finished
 
 The autoprint controls are available on the tab of the plugin (see picture below) and are only available if the printer is neither printing, paused nor pausing a print.
