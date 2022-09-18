@@ -314,6 +314,6 @@ $(function () {
         // ViewModels your plugin depends on, e.g. loginStateViewModel, settingsViewModel, ...
         dependencies: ["settingsViewModel", "filesViewModel"],
         // Elements to bind to, e.g. #settings_plugin_autoprint, #tab_plugin_autoprint, ...
-        elements: ["#settings_plugin_autoprint", "#tab_plugin_autoprint"]
+        elements: ["#settings_plugin_autoprint", "#tab_plugin_autoprint", "#navbar_plugin_autoprint"]
     });
 });

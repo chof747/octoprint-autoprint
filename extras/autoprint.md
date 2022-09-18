@@ -105,6 +105,8 @@ The plugin offers several options of useage:
 
 During the cooldown process you can cancel the shutdown of the printer at any time by pressing the button on  the top left which is in this phased labelled as "Cancel Shut Down"
 
+For convenience there is a light-bulb icon in the navbar which allows switching the lights from any window/screen in octoprint. This button also appears in the touchUI as a menu entry on the right.
+
 ---
   
 **Note:** The lights icon is also triggering the lights. When clicking on it you can toggle the state of the lights regardless of the state of the printer (e.g. for turning on the lights to check your printer while off or for turning them off while printing)
