@@ -47,6 +47,10 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
             {
             "type": "tab",
             "custom_bindings": True
+        },
+            {
+            "type": "navbar",
+            "custom_bindings": True
         }
         ]
 

@@ -27,6 +27,30 @@ a.button, a:hover, a:focus, a:active {
     cursor: pointer;
 }
 
+#autoprint_light_navbar {
+    display: none;
+}
+
+#touch  #autoprint_light_navbar {
+    display:  inline
+}
+
+#touch #navbar .navbar-inner .button::before {
+    content: none !important;
+}
+
+#touch #navbar .navbar-inner i {
+    margin-right: 15px;
+    width: 1.25rem;
+    text-align: center;
+}
+
+#touch #navbar .navbar-inner .button {
+    min-height: 30px;
+    padding: 4px 0 0 15px;
+    border: 0px;
+}
+
 .controls,.radio {
     margin-top: 5px;
 }
