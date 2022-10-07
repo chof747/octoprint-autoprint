@@ -11,7 +11,7 @@ class PrintJob:
     Class representing a print job for the autoprint plugin
     """
 
-    def __init__(self, file: str, time: datetime, turnoffAfter: bool, startFinish: str,
+    def __init__(self, file: str, time: datetime, turnoffAfter: bool, startFinish: str, startWithLights: bool,
                  logger: Logger, fileManager: FileManager):
         self._logger = logger
         self._fileManager = fileManager
@@ -21,6 +21,7 @@ class PrintJob:
         self._startTime = None
         self._turnOffAfter = turnoffAfter
         self._startFinish = startFinish
+        self._startWithLights = startWithLights
         
         if ("asap" != self._startFinish):
             self._calcStartTime()
@@ -64,6 +65,12 @@ class PrintJob:
 
     secondsToStart = property(_getSecondsToStart, None, None,
                             "The time in second until the printjob should start")
+
+    def _isStartingWithLights(self):
+        return True if self._startWithLights else False
+
+    startWithLights = property(_isStartingWithLights, None, None,
+                            "Determining if the printer should start with the lights on")
 
     def _getJobFile(self):
         return self._jobFile

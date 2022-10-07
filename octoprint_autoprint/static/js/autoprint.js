@@ -32,6 +32,7 @@ $(function () {
         self.autoprint = {
             turnOffAfterPrint: ko.observable(false),
             startFinish: ko.observable('asap'),
+            startWithLights: ko.observable(false),
             time: ko.observable((new Date()).getTime()),
             file: ko.observable(),
             folder: ko.observable('')
@@ -103,8 +104,9 @@ $(function () {
         };
 
         self.onBeforeBinding = function () {
-            console.log(self.settings);
             ko.computed(self.updateFiles);
+            self.autoprint.turnOffAfterPrint(self.settings.settings.plugins.autoprint.defaults.turnOffAfterPrint());
+            console.log(self.settings.settings.plugins.autoprint.defaults.turnOffAfterPrint());
             self.updateState();
         };
 
@@ -171,7 +173,8 @@ $(function () {
                 folder: self.autoprint.folder() || "",
                 time: self.autoprint.time(),
                 turnOffAfterPrint: self.autoprint.turnOffAfterPrint(),
-                startFinish: self.autoprint.startFinish()
+                startFinish: self.autoprint.startFinish(),
+                startWithLights: self.autoprint.startWithLights()
             }
 
             OctoPrint.simpleApiCommand("autoprint", "scheduleJob", job).then(

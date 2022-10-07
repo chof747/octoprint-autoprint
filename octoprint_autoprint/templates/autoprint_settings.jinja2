@@ -51,5 +51,17 @@
               is done, before the printer can be turned off. (To avoid leaving the filament too 
               long in a hot hotend)</span>
         </div>
+    </div>
+    
+    <div class="control-group">
+        <label class="control-label">{{ _('Turn off printer after print') }}</label>
+        <div class="controls">
+            <div class="input-append">
+                <input type="checkbox" class="input-block-level" data-bind="checked: settings.settings.plugins.autoprint.defaults.turnOffAfterPrint">
+            </div>
+            <span class="help-inline">
+              Configure if turning off the printer after print job is done is the default behaviour</span>
+        </div>
     </div> 
+</form>  
 </form> 
