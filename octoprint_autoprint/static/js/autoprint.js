@@ -63,7 +63,8 @@ $(function () {
         self.scheduledJob = {
             file: ko.observable(undefined),
             startTime: ko.observable(undefined),
-            turnOffAfterPrint: ko.observable(undefined)
+            turnOffAfterPrint: ko.observable(undefined),
+            startWithLights: ko.observable(undefined)
         }
 
         self.timeDisplay = ko.computed({
@@ -211,7 +212,8 @@ $(function () {
             if (undefined !== jobdata) {
                 self.scheduledJob.file(jobdata.file);
                 self.scheduledJob.startTime(jobdata.startTime);
-                self.scheduledJob.turnOffAfterPrint(jobdata.turnOffAfter);    
+                self.scheduledJob.turnOffAfterPrint(jobdata.turnOffAfter);   
+                self.scheduledJob.startWithLights(jobdata.startWithLights);   
             } else {
                 self.scheduledJob.file(undefined)
             }

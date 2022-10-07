@@ -116,6 +116,10 @@
       <td><span data-bind="text: (new Date(scheduledJob.startTime())).toLocaleString()"/></td>
     </tr>
       <tr>
+      <td>Start with lights on</td>
+      <td><span data-bind="text: scheduledJob.startWithLights() ? 'yes' : 'no'"/></td>
+    </tr>
+      <tr>
       <td>Turn off printer when done</td>
       <td><span data-bind="text: scheduledJob.turnOffAfterPrint() ? 'yes' : 'no'"/></td>
     </tr>

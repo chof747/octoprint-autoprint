@@ -52,7 +52,8 @@ class PrintJob:
             "file": self._jobFile,
             "time": self._time.timestamp()*1000,
             "startTime": self._startTime.timestamp()*1000,
-            "turnOffAfter" : self._turnOffAfter
+            "turnOffAfter" : self._turnOffAfter,
+            "startWithLights" : self._startWithLights
         }
 
     # ~Properties
