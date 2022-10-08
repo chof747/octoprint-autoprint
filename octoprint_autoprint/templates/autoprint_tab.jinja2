@@ -81,6 +81,13 @@
         <input type="checkbox" data-bind="checked: autoprint.turnOffAfterPrint" />
       </div>
     </div>
+    <div class="control-group">
+      <label class="control-label">{{ _('Turn lights on at start') }}
+      </label>
+      <div class="controls">
+        <input type="checkbox" data-bind="checked: autoprint.startWithLights" />
+      </div>
+    </div>
     <div class="controll-group">
       <div class="controls">
         <button class="btn" data-bind="click: scheduleJob">{{ _('Schedule Print Job')}}</button>
@@ -107,6 +114,10 @@
     <tr>
       <td>Starting at</td>
       <td><span data-bind="text: (new Date(scheduledJob.startTime())).toLocaleString()"/></td>
+    </tr>
+      <tr>
+      <td>Start with lights on</td>
+      <td><span data-bind="text: scheduledJob.startWithLights() ? 'yes' : 'no'"/></td>
     </tr>
       <tr>
       <td>Turn off printer when done</td>

@@ -17,17 +17,19 @@ class PrinterControl:
         self._gpioLight = None
         self._startupTime = None
         self._cooldownTemp = None
+        self._turnOffAfterPrint = False
         GPIO.setmode(GPIO.BCM)
 
         self._logger = logger
         self._printer = printer
         self._cooldownTimer = None
 
-    def startUpPrinter(self, callback = None) -> bool:
+    def startUpPrinter(self, callback = None, lightsOn=True) -> bool:
         """Command that starts up the printer and turns on the light"""
 
         self._switchPrinter(True)
-        self._switchLight(True)
+        if (lightsOn):
+            self._switchLight(True)
 
         connectTimer = ResettableTimer(self._startupTime, self._connectPrinter, [callback])        
         connectTimer.start();   
@@ -170,6 +172,15 @@ class PrinterControl:
 
     cooldownTemp = property(_getCooldownTemp, _setCooldownTemp,
                             None, "The nozzle cooldown temperature Threshold")
+
+    def _getTurnOffAfterPrint(self):
+        return self._turnOffAfterPrint
+
+    def _setTurnOffAfterPrint(self, turnOff):
+        self._turnOffAfterPrint = True if (turnOff) else False
+
+    turnOffAfterPrint = property(_getTurnOffAfterPrint, _setTurnOffAfterPrint, None,
+                                 "Default value if to turn off printer after print")
 
     @property
     def isCoolingDown(self):

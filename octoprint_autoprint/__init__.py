@@ -78,6 +78,9 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
             },
             "nozzle": {
                 "cooldownTemp": 60
+            },
+            "defaults": {
+                "turnOffAfterPrint": False,
             }
         }
 
@@ -93,6 +96,9 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
             ["printer", "startupTime"])
         self._printerControl.cooldownTemp = self._settings.get(
             ["nozzle", "cooldownTemp"])
+        self._printerControl.turnOffAfterPrint = self._settings.get(
+            ["defaults", "turnOffAfterPrint"]
+        )
 
     # ~~ AssetPlugin mixin
 
@@ -169,6 +175,7 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
                 pj = PrintJob(path,
                               time, jobData["turnOffAfterPrint"],
                               jobData["startFinish"],
+                              jobData["startWithLights"],
                               self._logger,
                               self._file_manager)
 
