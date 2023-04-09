@@ -1,5 +1,6 @@
 from logging import Logger
-import RPi.GPIO as GPIO
+import re
+import gpiod
 from time import sleep
 from octoprint.printer import PrinterInterface
 from octoprint.util import ResettableTimer
@@ -8,17 +9,26 @@ CONNECTION_WAIT = 1
 CONNECTION_TIMEOUT_REPEAT = 5
 TEMP_WAIT_CYCLE = 5
 
+# Configuration for both the printer power and light GPIOs
+GPIO_CONFIG = gpiod.line_request()
+GPIO_CONFIG.consumer = 'octoprint-autoprint'
+GPIO_CONFIG.request_type = gpiod.line_request.DIRECTION_OUTPUT
+
+# All the data fields we need to do GPIO
+class GpioBundle:
+    def __init__(self, chip, line, name):
+        self.chip = chip
+        self.line = line
+        self.name = name
+
 class PrinterControl:
 
     def __init__(self, logger: Logger, printer: PrinterInterface) -> None:
-        self._statePrinter = False
-        self._stateLight = False
         self._gpioPrinter = None
         self._gpioLight = None
         self._startupTime = None
         self._cooldownTemp = None
         self._turnOffAfterPrint = False
-        GPIO.setmode(GPIO.BCM)
 
         self._logger = logger
         self._printer = printer
@@ -27,9 +37,9 @@ class PrinterControl:
     def startUpPrinter(self, callback = None, lightsOn=True) -> bool:
         """Command that starts up the printer and turns on the light"""
 
-        self._switchPrinter(True)
+        self._statePrinter = True
         if (lightsOn):
-            self._switchLight(True)
+            self._stateLight = True
 
         connectTimer = ResettableTimer(self._startupTime, self._connectPrinter, [callback])        
         connectTimer.start();   
@@ -54,9 +64,28 @@ class PrinterControl:
 
     def toggleLight(self):
         """Command to toggle the state of the light"""
-        self._switchLight(not self._stateLight)
+        self._stateLight = not self._stateLight
 
 # ~~ Private helper Methods
+
+    def _getPrinterState(self):
+        return bool(self._gpioPrinter.line.get_value()) if None != self._gpioPrinter else None
+    def _setPrinterState(self, state):
+        self._gpioPrinter.line.set_value(state)
+        self._logger.debug("Printer turned %s" %
+                           ("on" if state else "off"))
+    
+    _statePrinter = property(_getPrinterState, _setPrinterState)
+
+    def _getLightState(self):
+        return bool(self._gpioLight.line.get_value()) if None != self._gpioLight else None
+    def _setLightState(self, state):
+        self._gpioLight.line.set_value(state)
+        self._logger.debug("Light turned %s" %
+                           ("on" if state else "off"))
+    
+    _stateLight = property(_getLightState, _setLightState)
+
 
     def _checkTemperatures(self):
         tempData = self._printer.get_current_temperatures()
@@ -69,77 +98,90 @@ class PrinterControl:
         return tempOK
 
     def _shutDown(self):
-            self._printer.disconnect();
+            self._printer.disconnect()
 
             while (not self._printer.is_closed_or_error()): 
                 pass
             
-            self._switchPrinter(False)
-            self._switchLight(False)
+            self._statePrinter = False
+            self._stateLight = False
 
-    def _prepGPIOPin(self, pin) -> bool:
-        GPIO.setup(pin, GPIO.IN)
-        state = 1 == GPIO.input(pin)
+    def _findGPIOPin(self, pinName):
+        for chip in gpiod.chip_iter():
+            for line in chip.get_all_lines():
+                if line.name == pinName:
+                    self._logger.debug(f"Found Exact Match for GPIO \"{pinName}\"")
+                    return GpioBundle(chip, line, pinName)
+        
+        # Some pins have multiple uses, and their names are space delineated.
+        # ie: BeagleBone Black chip3,line30 is named "P9_11 [uart4_rxd]"
+        # If the user updates thier config to the full name, this warning goes away,
+        #   though it is still functional either way, so long as there is only one match.
+        partialMatch = re.compile(f'(?:\\s|^|\\[){pinName}(?:\\s|$|\\])')
+        matches = []
+        for chip in gpiod.chip_iter():
+            for line in chip.get_all_lines():
+                if None != partialMatch.search(line.name):
+                    matches.append(GpioBundle(chip, line, pinName))
+        
+        if 1 == len(matches):
+            self._logger.warn(f"Using Partial Match for GPIO \"{pinName}\": \"{matches[0].line.name}\"")
+            return matches[0]
+        elif 1 < len(matches):
+            self._logger.error(f"Multiple GPIOs Matched \"{pinName}\": {','.join(match.name for match in matches)}")
+        
+        self._logger.error(f"Could not find GPIO \"{pinName}\"")
 
-        GPIO.setup(pin, GPIO.OUT)
-        GPIO.output(pin, state)
+    def _prepGPIOPin(self, gpioBundle):
+        gpioBundle.line.request(GPIO_CONFIG)
 
-        return state
+    def _cleanupGpioPin(self, gpioBundle):
+        gpioBundle.line.release()
 
     def _connectPrinter(self, callback):
         self._printer.connect()
         callback()
 
-    def _switchLight(self, state):
-        GPIO.output(self._gpioLight, state)
-        self._logger.debug("Light turned %s" %
-                           ("on" if state else "off"))
-        self._stateLight = state
-
-    def _switchPrinter(self, state):
-        GPIO.output(self._gpioPrinter, state)
-        self._logger.debug("Printer turned %s" %
-                           ("on" if state else "off"))
-        self._statePrinter = state
-
 # ~~ Properties
-
-    def _getPrinterState(self):
-        return self._statePrinter
 
     isPrinterOn = property(_getPrinterState, None, None,
                            "Represents the state of the printer relais")
-
-    def _getLightState(self):
-        return self._stateLight
 
     isLightOn = property(_getLightState, None, None,
                          "Represents the state of the light relais")
 
     def _getPrinterGPIO(self):
-        return self._gpioPrinter
+        return self._gpioPrinter.name
 
-    def _setPrinterGPIO(self, pin):
-        if (None != self._gpioPrinter):
-            GPIO.cleanup(self._gpioPrinter)
-        self._gpioPrinter = int(pin)
-        self._statePrinter = self._prepGPIOPin(self._gpioPrinter)
-        self._logger.info(
-            f"New printer GPIO port is gpio{self._gpioPrinter} and it is {self._statePrinter}")
+    def _setPrinterGPIO(self, pinName):
+        newPrinterGpio = self._findGPIOPin(pinName)
+
+        if (None != newPrinterGpio):
+            if (None != self._gpioPrinter):
+                self._cleanupGpioPin(self._gpioPrinter)
+                self._gpioPrinter = None
+            self._gpioPrinter = newPrinterGpio
+            self._prepGPIOPin(self._gpioPrinter)
+            self._logger.info(
+                f"New printer GPIO port is gpio {self._gpioPrinter.name} and it is {self._statePrinter}")
 
     printerGpio = property(_getPrinterGPIO, _setPrinterGPIO,
                            None, "The GPIO pin triggering the printer relais")
 
     def _getLightGPIO(self):
-        return self._gpioLight
+        return self._gpioLight.name
 
-    def _setLightGPIO(self, pin):
-        if (None != self._gpioLight):
-            GPIO.cleanup(self._gpioLight)
-        self._gpioLight = int(pin)
-        self._stateLight = self._prepGPIOPin(self._gpioLight)
-        self._logger.info(
-            f"New light GPIO port is gpio{self._gpioLight} and it is {self._stateLight}")
+    def _setLightGPIO(self, pinName):
+        newLightGpio = self._findGPIOPin(pinName)
+
+        if (None != newLightGpio):
+            if (None != self._gpioLight):
+                self._cleanupGpioPin(self._gpioLight)
+                self._gpioLight = None
+            self._gpioLight = newLightGpio
+            self._stateLight = self._prepGPIOPin(self._gpioLight)
+            self._logger.info(
+                f"New light GPIO port is gpio {self._gpioLight.name} and it is {self._stateLight}")
 
     lightGpio = property(_getLightGPIO, _setLightGPIO, None,
                          "The GPIO pin triggering the light relais")

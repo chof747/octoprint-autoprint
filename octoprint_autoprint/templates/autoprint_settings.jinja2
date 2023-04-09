@@ -13,17 +13,17 @@
     <div class="control-group">
         <label class="control-label">{{ _('Printer Power') }}</label>
         <div class="controls">
-            <input type="number" class="input-block-level" data-bind="value: settings.settings.plugins.autoprint.gpio.printer">
+            <input class="input-block-level" data-bind="value: settings.settings.plugins.autoprint.gpio.printer">
             <span class="help-inline">
-              GPIO pin (in BCM numbering scheme) of the relais powering the printer</span>
+              GPIO pin of the relais powering the printer. Use gpioinfo to find the name.</span>
         </div>
     </div>
     <div class="control-group">
         <label class="control-label">{{ _('Printer Light') }}</label>
         <div class="controls">
-            <input type="number" class="input-block-level" data-bind="value: settings.settings.plugins.autoprint.gpio.light">
+            <input class="input-block-level" data-bind="value: settings.settings.plugins.autoprint.gpio.light">
             <span class="help-inline">
-              GPIO pin (in BCM numbering scheme) of the relais powering the lights</span>
+              GPIO pin of the relais powering the lights. Use gpioinfo to find the name.</span>
         </div>
     </div>
 
