@@ -33,16 +33,7 @@ plugin_url = "https://github.com/chof747/octoprint-autoprint"
 plugin_license = "AGPLv3"
 
 # Any additional requirements besides OctoPrint should be listed here
-#plugin_requires = ["RPi.GPIO"]
-
-try:
-    with open('/sys/firmware/devicetree/base/model', 'r') as m:
-        if 'raspberry pi' in m.read().lower(): 
-            plugin_requires = ["RPi.GPIO"]
-        else:
-            plugin_requires = []
-except Exception:
-    plugin_requires = []
+plugin_requires = ["gpiod"]
 
 ### --------------------------------------------------------------------------------------------------------------------
 ### More advanced options that you usually shouldn't have to touch follow after this point

@@ -29,10 +29,15 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
 
     def __init__(self) -> None:
         super().__init__()
+        self._printerControl = None
 
     # ~~ Startup Plugin
 
     def on_after_startup(self):
+        # Another method beat us to it
+        if None != self._printerControl:
+            return
+
         self._printerControl = PrinterControl(self._logger, self._printer)
         self.assignSettings()
         self._autoprinterTimer = AutoPrinterTimer(
@@ -55,6 +60,10 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
         ]
 
     def get_template_vars(self):
+        # Sometimes this gets called before on_after_startup for some reason
+        if None == self._printerControl:
+            self.on_after_startup()
+
         result = dict(
             state=dict(
                 printer=self._printerControl.isPrinterOn,
