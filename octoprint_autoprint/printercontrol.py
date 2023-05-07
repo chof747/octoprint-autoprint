@@ -21,6 +21,21 @@ class GpioBundle:
         self.line = line
         self.name = name
 
+# Lists all GPIO Names
+def ListGpioNames():
+    gpioNames = []
+    for chip in gpiod.chip_iter():
+        for line in chip.get_all_lines():
+            gpioNames.append(line.name)
+    
+    # Remove duplicates sicne they cannot be identified by name
+    uniqueGpioNames = []
+    for name in gpioNames:
+        if gpioNames.count(name) == 1:
+            uniqueGpioNames.append(name)
+    
+    return uniqueGpioNames
+
 class PrinterControl:
 
     def __init__(self, logger: Logger, printer: PrinterInterface) -> None:
@@ -65,7 +80,7 @@ class PrinterControl:
     def toggleLight(self):
         """Command to toggle the state of the light"""
         self._stateLight = not self._stateLight
-
+    
 # ~~ Private helper Methods
 
     def _getPrinterState(self):
@@ -112,23 +127,6 @@ class PrinterControl:
                 if line.name == pinName:
                     self._logger.debug(f"Found Exact Match for GPIO \"{pinName}\"")
                     return GpioBundle(chip, line, pinName)
-        
-        # Some pins have multiple uses, and their names are space delineated.
-        # ie: BeagleBone Black chip3,line30 is named "P9_11 [uart4_rxd]"
-        # If the user updates thier config to the full name, this warning goes away,
-        #   though it is still functional either way, so long as there is only one match.
-        partialMatch = re.compile(f'(?:\\s|^|\\[){pinName}(?:\\s|$|\\])')
-        matches = []
-        for chip in gpiod.chip_iter():
-            for line in chip.get_all_lines():
-                if None != partialMatch.search(line.name):
-                    matches.append(GpioBundle(chip, line, pinName))
-        
-        if 1 == len(matches):
-            self._logger.warn(f"Using Partial Match for GPIO \"{pinName}\": \"{matches[0].line.name}\"")
-            return matches[0]
-        elif 1 < len(matches):
-            self._logger.error(f"Multiple GPIOs Matched \"{pinName}\": {','.join(match.name for match in matches)}")
         
         self._logger.error(f"Could not find GPIO \"{pinName}\"")
 

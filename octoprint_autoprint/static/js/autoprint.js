@@ -35,8 +35,15 @@ $(function () {
             startWithLights: ko.observable(false),
             time: ko.observable((new Date()).getTime()),
             file: ko.observable(),
-            folder: ko.observable('')
+            folder: ko.observable(''),
         };
+
+        self.gpiosVisible = ko.observable(false);
+        self.gpioNames = ko.observableArray();
+        OctoPrint.simpleApiCommand("autoprint", "listGpioNames")
+            .done((response) => {
+                self.gpioNames(response.gpioNames.sort());
+            });
 
         self.setFolder = ko.computed({
             read: function() {
@@ -52,8 +59,7 @@ $(function () {
     
             },
             owner : self
-        })
-
+        });
 
         self.errormsgs = {
             time: ko.observable(undefined),
@@ -273,6 +279,26 @@ $(function () {
             {
                 return null;
             }
+        };
+
+        self.gpioBtnClass = (gpioName) => ko.computed(() => {
+            const gpioSettings = self.settings.settings.plugins.autoprint.gpio;
+            if (gpioName === gpioSettings.printer()) return 'btn-success';
+            if (gpioName === gpioSettings.light()) return 'btn-warning';
+            return '';
+        });
+        self.gpioBtnEnabled = (gpioName) => ko.computed(() => {
+            const gpioSettings = self.settings.settings.plugins.autoprint.gpio;
+            const usedGpios = [gpioSettings.printer(), gpioSettings.light()];
+            return usedGpios.includes(gpioName) || usedGpios.includes(null);
+        });
+        self.gpioBtnClick = (gpioName) => {
+            const gpioSettings = self.settings.settings.plugins.autoprint.gpio;
+
+            if      (gpioSettings.printer() === gpioName) gpioSettings.printer(null);
+            else if (gpioSettings.light() === gpioName) gpioSettings.light(null);
+            else if (gpioSettings.printer() === null) gpioSettings.printer(gpioName);
+            else if (gpioSettings.light() === null) gpioSettings.light(gpioName);
         };
 
         /*
