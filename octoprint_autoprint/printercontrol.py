@@ -26,7 +26,8 @@ def ListGpioNames():
     gpioNames = []
     for chip in gpiod.chip_iter():
         for line in chip.get_all_lines():
-            gpioNames.append(line.name)
+            if not line.is_used():
+                gpioNames.append(line.name)
     
     # Remove duplicates sicne they cannot be identified by name
     uniqueGpioNames = []
@@ -152,12 +153,14 @@ class PrinterControl:
         return self._gpioPrinter.name
 
     def _setPrinterGPIO(self, pinName):
+        if (None != self._gpioPrinter):
+            self._cleanupGpioPin(self._gpioPrinter)
+            self._gpioPrinter = None
+
+        if (None == pinName): return
         newPrinterGpio = self._findGPIOPin(pinName)
 
         if (None != newPrinterGpio):
-            if (None != self._gpioPrinter):
-                self._cleanupGpioPin(self._gpioPrinter)
-                self._gpioPrinter = None
             self._gpioPrinter = newPrinterGpio
             self._prepGPIOPin(self._gpioPrinter)
             self._logger.info(
@@ -170,12 +173,14 @@ class PrinterControl:
         return self._gpioLight.name
 
     def _setLightGPIO(self, pinName):
+        if (None != self._gpioLight):
+            self._cleanupGpioPin(self._gpioLight)
+            self._gpioLight = None
+
+        if (None == pinName): return
         newLightGpio = self._findGPIOPin(pinName)
 
         if (None != newLightGpio):
-            if (None != self._gpioLight):
-                self._cleanupGpioPin(self._gpioLight)
-                self._gpioLight = None
             self._gpioLight = newLightGpio
             self._stateLight = self._prepGPIOPin(self._gpioLight)
             self._logger.info(

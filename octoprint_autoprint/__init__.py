@@ -35,7 +35,6 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
     # ~~ Startup Plugin
 
     def on_after_startup(self):
-        self._startup = True
         self._printerControl = PrinterControl(self._logger, self._printer)
         self.assignSettings()
         self._autoprinterTimer = AutoPrinterTimer(
@@ -107,6 +106,9 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
         self.assignSettings()
 
     def assignSettings(self):
+        self._printerControl.printerGpio = None
+        self._printerControl.lightGpio = None
+
         self._printerControl.printerGpio = self._settings.get(
             ["gpio", "printer"])
         self._printerControl.lightGpio = self._settings.get(["gpio", "light"])
