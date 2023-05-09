@@ -35,8 +35,15 @@ $(function () {
             startWithLights: ko.observable(false),
             time: ko.observable((new Date()).getTime()),
             file: ko.observable(),
-            folder: ko.observable('')
+            folder: ko.observable(''),
         };
+
+        self.gpiosVisible = ko.observable(false);
+        self.gpioNames = ko.observableArray();
+        OctoPrint.simpleApiCommand("autoprint", "listGpioNames")
+            .done((response) => {
+                self.gpioNames(response.gpioNames.sort());
+            });
 
         self.setFolder = ko.computed({
             read: function() {
@@ -52,8 +59,7 @@ $(function () {
     
             },
             owner : self
-        })
-
+        });
 
         self.errormsgs = {
             time: ko.observable(undefined),
@@ -273,6 +279,28 @@ $(function () {
             {
                 return null;
             }
+        };
+
+        self.gpioBtnClass = (thisButton) => ko.computed(() => {
+            const gpioSettings = self.settings.settings.plugins.autoprint.gpio;
+            if (thisButton === gpioSettings.printer()) return 'btn-success';
+            if (thisButton === gpioSettings.light()) return 'btn-warning';
+            return '';
+        });
+        self.gpioBtnEnabled = (thisButton) => ko.computed(() => {
+            const gpioSettings = self.settings.settings.plugins.autoprint.gpio;
+            const usedGpios = [gpioSettings.printer(), gpioSettings.light()];
+
+            const invalidSettings = !self.gpioNames().includes(gpioSettings.printer()) || !self.gpioNames().includes(gpioSettings.light());
+            return usedGpios.includes(thisButton) || usedGpios.includes(null) || invalidSettings;
+        });
+        self.gpioBtnClick = (thisButton) => {
+            const gpioSettings = self.settings.settings.plugins.autoprint.gpio;
+
+            if      (gpioSettings.printer() === thisButton) gpioSettings.printer(null);
+            else if (gpioSettings.light() === thisButton) gpioSettings.light(null);
+            else if (gpioSettings.printer() === null || !self.gpioNames().includes(gpioSettings.printer())) gpioSettings.printer(thisButton);
+            else if (gpioSettings.light() === null || !self.gpioNames().includes(gpioSettings.light())) gpioSettings.light(thisButton);
         };
 
         /*

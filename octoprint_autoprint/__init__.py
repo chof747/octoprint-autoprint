@@ -12,7 +12,8 @@ import imp
 
 import octoprint.plugin
 
-from .printercontrol import PrinterControl
+from flask import make_response
+from .printercontrol import PrinterControl, ListGpioNames
 from octoprint.printer import PrinterInterface
 from datetime import datetime
 from .printjob import PrintJob, PrintJobTooEarly
@@ -34,10 +35,6 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
     # ~~ Startup Plugin
 
     def on_after_startup(self):
-        # Another method beat us to it
-        if None != self._printerControl:
-            return
-
         self._printerControl = PrinterControl(self._logger, self._printer)
         self.assignSettings()
         self._autoprinterTimer = AutoPrinterTimer(
@@ -60,10 +57,6 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
         ]
 
     def get_template_vars(self):
-        # Sometimes this gets called before on_after_startup for some reason
-        if None == self._printerControl:
-            self.on_after_startup()
-
         result = dict(
             state=dict(
                 printer=self._printerControl.isPrinterOn,
@@ -113,6 +106,9 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
         self.assignSettings()
 
     def assignSettings(self):
+        self._printerControl.printerGpio = None
+        self._printerControl.lightGpio = None
+
         self._printerControl.printerGpio = self._settings.get(
             ["gpio", "printer"])
         self._printerControl.lightGpio = self._settings.get(["gpio", "light"])
@@ -147,7 +143,8 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
             "scheduleJob": [
                 "file", "folder", "time", "startFinish", "turnOffAfterPrint"
             ],
-            "cancelJob": []
+            "cancelJob": [],
+            "listGpioNames": [],
         }
 
     def on_api_command(self, command, data):
@@ -163,6 +160,8 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
             return self._handleScheduleJob(data)
         elif "cancelJob" == command:
             return self._cancelScheduledJob()
+        elif "listGpioNames" == command:
+            return make_response({"gpioNames": ListGpioNames()}, 200)
 
     def on_api_get(self, request):
         result = {
@@ -181,7 +180,6 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
         return result
 
     def _handleScheduleJob(self, jobData):
-        from flask import make_response
         time = datetime.fromtimestamp(jobData["time"]/1000)
         errors = []
 

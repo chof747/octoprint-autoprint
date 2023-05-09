@@ -11,19 +11,39 @@
             Note: Be aware that the GPIOs must be <b>active high</b> in order to work properly</p>
     </div>
     <div class="control-group">
-        <label class="control-label">{{ _('Printer Power') }}</label>
+        <strong><span class="control-label text-success">{{ _('Printer Power') }}</span></strong>
         <div class="controls">
             <input class="input-block-level" data-bind="value: settings.settings.plugins.autoprint.gpio.printer">
             <span class="help-inline">
-              GPIO pin of the relais powering the printer. Use gpioinfo to find the name.</span>
+              GPIO pin of the relais powering the printer. Select the pin below.</span>
         </div>
     </div>
     <div class="control-group">
-        <label class="control-label">{{ _('Printer Light') }}</label>
+        <strong><span class="control-label text-warning">{{ _('Printer Light') }}</span></strong>
         <div class="controls">
             <input class="input-block-level" data-bind="value: settings.settings.plugins.autoprint.gpio.light">
             <span class="help-inline">
-              GPIO pin of the relais powering the lights. Use gpioinfo to find the name.</span>
+              GPIO pin of the relais powering the lights. Select the pin below.</span>
+        </div>
+        <button type="button" class="btn btn-link"
+            data-bind="click: () => gpiosVisible(!gpiosVisible()),
+                    text: gpiosVisible() ? 'Hide Available GPIOs...' : 'Show Available GPIOs...'"
+        ></button>
+    </div>
+
+    <div class="control-group" data-bind="visible: gpiosVisible">
+        <div style="display: flex; gap: 1em; flex-wrap: wrap; justify-content: space-evenly">
+            <!-- This guy is important, or Bootstrap2 will remove the margin from the first button and throw the whole alignment outta wack -->
+            <div style="display: none"></div>
+
+            <!-- ko foreach: { data: gpioNames, as: 'gpioName' } -->
+            <button type="button" class="btn span3"
+                data-bind="click: $parent.gpioBtnClick(gpioName),
+                           text: gpioName,
+                           class: $parent.gpioBtnClass(gpioName),
+                           enable: $parent.gpioBtnEnabled(gpioName)"
+            ></button>
+            <!-- /ko -->
         </div>
     </div>
 
