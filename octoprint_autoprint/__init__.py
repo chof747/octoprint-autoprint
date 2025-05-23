@@ -79,8 +79,8 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
     def get_settings_defaults(self):
         return {
             "gpio": {
-                "printer": 17,
-                "light": 18
+                "printer": "GPIO17",
+                "light": "GPIO18"
             },
             "printer": {
                 "startupTime": 5
