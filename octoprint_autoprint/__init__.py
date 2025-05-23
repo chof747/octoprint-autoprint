@@ -76,6 +76,9 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
 
     # ~~ SettingsPlugin mixin
 
+    def get_settings_version(self):
+        return 1
+
     def get_settings_defaults(self):
         return {
             "gpio": {
@@ -92,6 +95,18 @@ class AutoprintPlugin(octoprint.plugin.StartupPlugin,
                 "turnOffAfterPrint": False,
             }
         }
+
+    def on_settings_migrate(self, target, current):
+        old_light = self._settings.get(["gpio", "light"])
+        old_printer = self._settings.get(["gpio", "printer"])
+        
+        if current is None or current < 1:
+            if isinstance(old_light, (int, float)):
+                self._settings.set(["gpio", "light"], "GPIO" + str(old_light))
+            if isinstance(old_printer, (int, float)):
+                self._settings.set(["gpio", "printer"], "GPIO" + str(old_printer))
+
+        
 
     def on_settings_save(self, data):
         octoprint.plugin.SettingsPlugin.on_settings_save(self, data)
