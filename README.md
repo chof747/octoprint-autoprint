@@ -7,9 +7,9 @@ The octoprint autoprint plugin has the following functionalities:
 2. Automatically disconnect and turn off the printer after a print is finished - with the option
    to wait for a proper cool down of the nozzle
 3. Start the printer and begin printing a specific file either at a given time or at a time
-   so that the print will be finished as specified 
+   so that the print will be finished as specified
 
-See the details on the [design and concept in Concept.md](Concept.md) 
+See the details on the [design and concept in Concept.md](Concept.md)
 
 ## Setup
 
@@ -23,28 +23,41 @@ and use `pip install .`to install the plugin
 ## Setup of a development environment
 
 1. Setup an OctoPrint development environment as described in the tutorial
-   https://docs.octoprint.org/en/master/plugins/gettingstarted.html
-   **NOTE:** If you are doing this in a separate path you can use this one for all your 
-   plugin development 
+   <https://docs.octoprint.org/en/master/plugins/gettingstarted.html>
+   **NOTE:** If you are doing this in a separate path you can use this one for all your
+   plugin development
 
-2. Create your plugin directory and initiate your plugin as described in the tutorial. 
+2. Create your plugin directory and initiate your plugin as described in the tutorial.
    Always start the virtual environment created for the OctoPrint dev environment when dealing with the plugin developmen.
    I.e. instead of
+
    ```sh
    source ./venv/bin/activate
    ```
-   use 
+
+   use
+
    ```sh
    source <Directory of your OctoPrint DevEnv>/venv/bin/activate
    ```
+
    On the first setup outside of a raspberry pi please also install the RPi.GPIO simulation library in the virtual environment:
+
    ```sh
    pip install git+https://github.com/nosix/raspberry-gpio-emulator/
    ```
 
 3. Start octoprint always from your plugin directory (in the virtual environment as described    in  2) with:
-   ```sh 
+
+   ```sh
+   octoprint dev plugin:install
+   ```
+
+4. Run the development with:
+
+   ```sh
    tests/octoprint_dev.sh
+   ```
 
 ## Description
 
